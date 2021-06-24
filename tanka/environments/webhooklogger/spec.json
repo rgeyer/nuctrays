@@ -1,0 +1,14 @@
+{
+  "apiVersion": "tanka.dev/v1alpha1",
+  "kind": "Environment",
+  "metadata": {
+    "name": "environments/webhooklogger",
+    "namespace": "environments/webhooklogger/main.jsonnet"
+  },
+  "spec": {
+    "apiServer": "https://192.168.42.100:6443",
+    "namespace": "mad",
+    "resourceDefaults": {},
+    "expectVersions": {}
+  }
+}
