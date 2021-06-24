@@ -4,6 +4,16 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/grafana/agent.git",
+          "subdir": "production/tanka/grafana-agent"
+        }
+      },
+      "version": "f4097f0ec7b52be30ec50c27b7d3fc05b875b14a",
+      "sum": "+Ci9jSOXIxgU8Id1x8QQT1Yo2QV3HdEKVwIEpyAv2QA="
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/grafana/jsonnet-libs.git",
           "subdir": "ksonnet-util"
         }

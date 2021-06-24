@@ -7,12 +7,14 @@ local container = k.core.v1.container,
 
 {
   _images+:: {
-    hass: 'jenkins/jenkins:lts-jdk11',
+    jenkins: 'jenkins/jenkins:lts-jdk11',
   },
 
   _config+:: {
     namespace: 'jenkins',
   },
+
+  namespace: k.core.v1.namespace.new($._config.namespace),
 
   jenkins_container::
     container.new('jenkins', $._images.jenkins),
