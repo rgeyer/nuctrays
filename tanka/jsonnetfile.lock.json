@@ -30,6 +30,16 @@
       },
       "version": "50fa5748382fbc0d6fb34105835fd07acaf0195f",
       "sum": "OXTug8dGtUKG5MGkSdEvMllGfPitqG1kdTk4pPVSH8k="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/rgeyer/agent.git",
+          "subdir": "production/tanka/grafana-agent"
+        }
+      },
+      "version": "8a797fa921ea914c2890ec716892f9f9fd195953",
+      "sum": "XtUv70rAwy3HJH8c817shv5yeXzFyKDH/NKNmgI6pYg="
     }
   ],
   "legacyImports": false

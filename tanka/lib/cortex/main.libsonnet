@@ -1,4 +1,4 @@
-local k = import 'ksonnet-util/kausal.libsonnet';
+local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
 
 local configMap = k.core.v1.configMap,
       container = k.core.v1.container,

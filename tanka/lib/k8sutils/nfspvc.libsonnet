@@ -1,4 +1,4 @@
-local k = import 'ksonnet-util/kausal.libsonnet';
+local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
 
 local pv = k.core.v1.persistentVolume,
       pvc = k.core.v1.persistentVolumeClaim;

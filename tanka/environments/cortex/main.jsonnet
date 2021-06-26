@@ -1,4 +1,4 @@
-local k = import 'ksonnet-util/kausal.libsonnet';
+local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
 
 local cortex = import 'cortex/main.libsonnet';
 local nfspvc = import 'k8sutils/nfspvc.libsonnet';

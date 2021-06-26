@@ -1,5 +1,5 @@
-local k = import 'ksonnet-util/kausal.libsonnet';
-local grafana_agent = import 'grafana-agent/v1/main.libsonnet';
+local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
+local grafana_agent = import 'github.com/rgeyer/agent/production/tanka/grafana-agent/v1/main.libsonnet';
 
 local secrets = import 'secrets.json';
 
@@ -68,8 +68,7 @@ secrets {
         sysfs_path: '/host/sys',
         procfs_path: '/host/proc',
       },
-    }) +
-    grafana_agent.integrationsMixin,
+    }),
 
   agent_deployment:
     grafana_agent.newDeployment('agent-deployment', $._config.namespace) +
