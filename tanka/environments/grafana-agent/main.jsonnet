@@ -68,7 +68,7 @@ secrets {
         sysfs_path: '/host/sys',
         procfs_path: '/host/proc',
       },
-    }) + {agent+: grafana_agent.integrationsMixin},
+    }),
 
   agent_deployment:
     grafana_agent.newDeployment('agent-deployment', $._config.namespace) +
