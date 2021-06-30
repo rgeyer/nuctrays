@@ -5,6 +5,8 @@ local secrets = import 'secrets.json';
 
 local loki_config = import 'loki_config.libsonnet';
 
+local deployment = k.apps.v1.deployment;
+
 local static_scrape_configs = {
   host_filter: false,
   name: 'static_scrape_configs',
@@ -15,6 +17,19 @@ local static_scrape_configs = {
       static_configs: [{
         targets: ['10.233.106.20:8080'],
       }],
+    },
+    {
+      job_name: 'nuctray-eighteen/etcd',
+      scheme: 'https',
+      static_configs: [{
+        targets: ['192.168.42.100:2379', '192.168.42.101:2379', '192.168.42.102:2379'],
+      }],
+      tls_config: {
+        ca_file: '/etc/ssl/etcd/ssl/ca.pem',
+        cert_file: '/etc/ssl/etcd/ssl/node-18n1l.pem',
+        key_file: '/etc/ssl/etcd/ssl/node-18n1l-key.pem',
+        insecure_skip_verify: false
+      },
     },
   ],
 };
@@ -79,5 +94,11 @@ secrets {
       },
     }) +
     grafana_agent.withPrometheusInstances(static_scrape_configs) +
-    grafana_agent.withRemoteWrite($._config.grafana_agent.cortex_remote_write),
+    grafana_agent.withRemoteWrite($._config.grafana_agent.cortex_remote_write) +
+    {
+      agent+: {
+        agent+: deployment.spec.template.spec.withNodeSelector({etcdnode: "true"}) +
+          k.util.hostVolumeMount('ssl', '/etc/ssl/etcd/ssl', '/etc/ssl/etcd/ssl', readOnly=true),
+      }
+    },
 }
