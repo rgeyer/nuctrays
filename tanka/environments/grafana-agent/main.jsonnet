@@ -12,13 +12,6 @@ local static_scrape_configs = {
   name: 'static_scrape_configs',
   scrape_configs: [
     {
-      job_name: 'integration/jenkins',
-      metrics_path: '/prometheus',
-      static_configs: [{
-        targets: ['10.233.106.20:8080'],
-      }],
-    },
-    {
       job_name: 'nuctray-eighteen/etcd',
       scheme: 'https',
       static_configs: [{
