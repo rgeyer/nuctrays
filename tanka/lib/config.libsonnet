@@ -1,5 +1,12 @@
 {
   _config+:: {
+    certbot+:: {
+      pvc: {
+        nfsHost: '192.168.42.10',
+        nfsPath: '/kubestore/certbot',
+      }
+    },
+
     cortex+:: {
       pvc: {
         nfsHost: '192.168.42.100',
