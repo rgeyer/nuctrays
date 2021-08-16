@@ -1,0 +1,73 @@
+all:
+  hosts:
+    18tc1:
+      ansible_host: 192.168.42.115
+      ip: 192.168.42.115
+      access_ip: 192.168.42.115
+      ethernet_device_name: eno1
+    18n1l:
+      ansible_host: 192.168.42.100
+      ip: 192.168.42.100
+      access_ip: 192.168.42.100
+      ethernet_device_name: enp2s0
+      etcd_nfs_path: 192.168.42.103:/mnt/brick/nfs/etcd/18n1l
+    18n1r:
+      ansible_host: 192.168.42.101
+      ip: 192.168.42.101
+      access_ip: 192.168.42.101
+      ethernet_device_name: enp2s0
+      etcd_nfs_path: 192.168.42.102:/mnt/brick/nfs/etcd/18n1r
+    18n2l:
+      ansible_host: 192.168.42.102
+      ip: 192.168.42.102
+      access_ip: 192.168.42.102
+      ethernet_device_name: enp2s0
+      etcd_nfs_path: 192.168.42.103:/mnt/brick/nfs/etcd/18n2l
+    18n2r:
+      ansible_host: 192.168.42.103
+      ip: 192.168.42.103
+      access_ip: 192.168.42.103
+      ethernet_device_name: enp2s0
+  children:
+    stor:
+      hosts:
+        18n1l:
+        18n1r:
+        18n2l:
+        18n2r:
+    magstor:
+      hosts:
+        18n1l:
+        18n1r:
+    ssdstor:
+      hosts:
+        18n2l:
+        18n2r:
+    petnodes:
+      hosts:
+        18n1l:
+        18n1r:
+        18n2l:
+        18n2r:
+    kube-master:
+      hosts:
+        18n1l:
+        18n1r:
+    kube-node:
+      hosts:
+        18tc1:
+        18n1l:
+        18n1r:
+        18n2l:
+        18n2r:
+    etcd:
+      hosts:
+        18n1l:
+        18n1r:
+        18n2l:
+    k8s-cluster:
+      children:
+        kube-master:
+        kube-node:
+    calico-rr:
+      hosts: {}

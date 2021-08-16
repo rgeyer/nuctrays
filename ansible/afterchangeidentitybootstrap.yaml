@@ -1,0 +1,73 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Enable necessary kernel modules
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - dm_snapshot
+        - dm_mirror
+        - dm_thin_pool
+
+    - name: Install Packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - glusterfs-client
+        - nfs-common
+        - cifs-utils
+        - jq
+        - util-linux
+        - coreutils
+
+    - name: Create CIFS volume plugin directory
+      ansible.builtin.file:
+        path: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/fstab~cifs
+        state: directory
+        mode: '0755'
+
+    - name: Download CIFS plugin
+      get_url:
+        url: https://raw.githubusercontent.com/fstab/cifs/master/cifs
+        dest: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/fstab~cifs/cifs
+        mode: '0755'
+
+    - name: Add local image registry hostname to /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^10.42.0.16 registry.ryangeyer.com registry'
+        line: 10.42.0.16 registry.ryangeyer.com registry
+
+    - name: Make brick mountpoint
+      ansible.builtin.file:
+        path: /mnt/brick
+        state: directory
+        mode: '0755'
+      when: inventory_hostname in groups['stor']
+
+    - name: Create XFS on /dev/sda
+      community.general.filesystem:
+        fstype: xfs
+        dev: /dev/sda
+      when: inventory_hostname in groups['stor']
+
+    - name: Mount brick
+      ansible.posix.mount:
+        path: /mnt/brick
+        src: /dev/sda
+        fstype: xfs
+        state: mounted
+      when: inventory_hostname in groups['stor']
+
+    - name: Setup Authorized Keys
+      ansible.posix.authorized_key:
+        user: ryan
+        state: present
+        key: '{{ item }}'
+      with_file:
+        - files/ssh/lenovoflex5.pub
+        - files/ssh/hp.pub

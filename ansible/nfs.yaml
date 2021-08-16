@@ -1,0 +1,9 @@
+---
+- hosts: stor
+  become: true
+  vars:
+    nfs_exports:
+    - "/mnt/brick *(rw,sync,no_root_squash)"
+
+  roles:
+  - { role: geerlingguy.nfs }

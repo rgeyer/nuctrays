@@ -1,0 +1,6 @@
+[submodule "ansible/roles/ansible-netplan"]
+	path = ansible/roles/ansible-netplan
+	url = https://github.com/mrlesmithjr/ansible-netplan
+[submodule "ansible/kubespray"]
+	path = ansible/kubespray
+	url = https://github.com/kubernetes-sigs/kubespray.git

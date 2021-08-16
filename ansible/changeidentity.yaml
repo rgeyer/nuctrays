@@ -1,0 +1,88 @@
+---
+- hosts: all
+  roles:
+    - role: ansible-netplan
+      become: yes
+      # This role will do nothing unless netplan_enabled is true.
+      netplan_enabled: true
+      # The default is /etc/netplan/config.yaml.
+      netplan_config_file: /etc/netplan/{{inventory_hostname}}.yaml
+      # Ubuntu 18.04, for example, defaults to using networkd.
+      netplan_renderer: networkd
+      # Simple network configuration to add a single network
+      # interface.
+      netplan_configuration:
+        {
+           "network": {
+              "version": 2,
+              "ethernets": {
+                 "{{ethernet_device_name}}": {
+                    "addresses": [
+                       "{{ip}}/24"
+                    ],
+                    "nameservers": {
+                       "addresses": [
+                          "8.8.8.8",
+                          "1.1.1.1"
+                       ]
+                    },
+                    "gateway4": "192.168.42.1"
+                 }
+              }
+           }
+        }
+        # network:
+        #   version: 2
+        #   ethernets:
+        #     {{ethernet_device_name}}:
+        #       addresses:
+        #         - "{{ip}}/24"
+        #       nameservers:
+        #         addresses:
+        #         - 8.8.8.8
+        #         - 1.1.1.1
+        #       gateway4: 192.168.42.1
+  become: true
+  tasks:
+
+  - name: Delete the stock netplan
+    ansible.builtin.file:
+      path: /etc/netplan/00-installer-config.yaml
+      state: absent
+
+  - name: Set Hostname
+    hostname:
+      name: "{{inventory_hostname}}"
+
+  - name: Replace DSA Host Key
+    community.crypto.openssh_keypair:
+      force: true
+      path: /etc/ssh/ssh_host_dsa_key
+      type: dsa
+    when: replace_keys is defined
+
+  - name: Replace ecdsa Host Key
+    community.crypto.openssh_keypair:
+      force: true
+      path: /etc/ssh/ssh_host_ecdsa_key
+      type: ecdsa
+    when: replace_keys is defined
+
+  - name: Replace ed25519 Host key
+    community.crypto.openssh_keypair:
+      force: true
+      path: /etc/ssh/ssh_host_ed25519_key
+      type: ed25519
+    when: replace_keys is defined
+
+  - name: Replace rsa Host Key
+    community.crypto.openssh_keypair:
+      force: true
+      path: /etc/ssh/ssh_host_rsa_key
+      type: rsa
+    when: replace_keys is defined
+
+  - name: Unconditionally reboot the machine, timeout immediately waiting for return of node, since it'll be on a new IP
+    reboot:
+      reboot_timeout: 0
+    when: reboot is defined

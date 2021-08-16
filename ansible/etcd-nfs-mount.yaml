@@ -1,0 +1,46 @@
+---
+- hosts: etcd
+  become: true
+
+  tasks:
+  - name: Check if it's mounted
+    ansible.posix.mount:
+      path: /var/lib/etcd
+      src: "{{ etcd_nfs_path }}"
+      state: mounted
+      fstype: nfs
+      opts: hard,nfsvers=4.1
+    check_mode: yes
+    register: is_mounted
+
+  - name: Mount NFS volumes for etcd
+    block:
+      - name: Check if etcd service exists
+        ansible.builtin.stat:
+          path: /etc/systemd/system/etcd.service
+        register: etcdsvc
+
+      - name: Stop the service
+        ansible.builtin.systemd:
+          name: etcd
+          state: stopped
+        check_mode: yes
+        when: etcdsvc.stat.exists
+
+      - name: Create fstab entry and mount
+        ansible.posix.mount:
+          path: /var/lib/etcd
+          src: "{{ etcd_nfs_path }}"
+          state: mounted
+          fstype: nfs
+          opts: hard,nfsvers=4.1
+
+      - name: Restart the service
+        ansible.builtin.systemd:
+          name: etcd
+          state: started
+          enabled: yes
+        check_mode: yes
+        when: etcdsvc.stat.exists
+
+    when: is_mounted.changed
