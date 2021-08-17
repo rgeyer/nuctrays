@@ -1,0 +1,6 @@
+---
+  - hosts: 18tc1
+    become: yes
+    become_user: root
+    roles:
+      - cyberpower

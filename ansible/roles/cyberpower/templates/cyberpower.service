@@ -1,0 +1,10 @@
+[Unit]
+Description=Cyberpower Prometheus Exporter
+
+[Service]
+User=root
+Group=root
+ExecStart=python3 {{cp_install_dir}}/exporter/server.py
+
+[Install]
+WantedBy=multi-user.target

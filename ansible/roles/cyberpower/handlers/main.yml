@@ -1,0 +1,6 @@
+---
+- name: Start cyberpower
+  systemd:
+    name: cyberpower
+    state: started
+    enabled: yes

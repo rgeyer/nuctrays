@@ -1,0 +1,32 @@
+---
+- name: clone exporter repo
+  ansible.builtin.git:
+    repo: https://github.com/bjonnh/cyberpower-usb-watcher.git
+    dest: "{{cp_install_dir}}/exporter"
+
+- name: set exporter to listen on 0.0.0.0
+  ansible.builtin.replace:
+    path: "{{cp_install_dir}}/exporter/server.py"
+    regexp: '127\.0\.0\.1'
+    replace: '0.0.0.0'
+
+- name: install packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3-pip
+    - libhidapi-libusb0
+
+- name: install exporter python modules
+  pip:
+    requirements: "{{cp_install_dir}}/exporter/requirements.txt"
+
+- name: template systemd service file to server
+  template:
+    src: cyberpower.service
+    dest: /etc/systemd/system
+    owner: root
+    group: root
+  notify:
+    - Start cyberpower

@@ -24,6 +24,13 @@ local static_scrape_configs = {
         insecure_skip_verify: false
       },
     },
+    {
+      job_name: 'dragonhouse/cyberpower',
+      scheme: 'http',
+      static_configs: [{
+        targets: ['192.168.42.115:9500'],
+      }],
+    },
   ],
 };
 
