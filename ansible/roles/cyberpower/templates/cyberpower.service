@@ -4,7 +4,7 @@ Description=Cyberpower Prometheus Exporter
 [Service]
 User=root
 Group=root
-ExecStart=python3 {{cp_install_dir}}/exporter/server.py
+ExecStart=python3 {{cp_install_dir}}/exporter/server.py --listen-ip 0.0.0.0
 
 [Install]
 WantedBy=multi-user.target
