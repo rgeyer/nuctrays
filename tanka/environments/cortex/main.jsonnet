@@ -2,7 +2,7 @@ local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet'
 
 local cortex = import 'cortex/main.libsonnet';
 local nfspvc = import 'k8sutils/nfspvc.libsonnet';
-local secrets = import 'secrets.json';
+local secrets = import 'secrets.libsonnet';
 local config = import 'config.libsonnet';
 
 local namespace = 'cortex';

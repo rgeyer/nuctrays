@@ -1,7 +1,7 @@
 local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
 local grafana_agent = import 'github.com/rgeyer/agent/production/tanka/grafana-agent/v1/main.libsonnet';
 
-local secrets = import 'secrets.json';
+local secrets = import 'secrets.libsonnet';
 
 local loki_config = import 'loki_config.libsonnet';
 

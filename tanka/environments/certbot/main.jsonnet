@@ -1,7 +1,7 @@
 local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
 
 local config = import 'config.libsonnet';
-local secrets = import 'secrets.json';
+local secrets = import 'secrets.libsonnet';
 local nfspvc = import 'k8sutils/nfspvc.libsonnet';
 
 local container = k.core.v1.container,

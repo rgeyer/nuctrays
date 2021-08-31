@@ -1,5 +1,5 @@
 local mysql = import 'mysql/mysql.libsonnet';
-local secrets = import 'secrets.json';
+local secrets = import 'secrets.libsonnet';
 
 secrets {
   _images+:: {

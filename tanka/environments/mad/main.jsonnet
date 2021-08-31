@@ -1,5 +1,5 @@
 local namefetcher = import 'madnamefetcher/madnamefetcher.libsonnet';
-local secrets = import 'secrets.json';
+local secrets = import 'secrets.libsonnet';
 
 secrets {
   _images+:: {
