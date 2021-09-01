@@ -35,5 +35,8 @@ local container = k.core.v1.container,
   dnsmasq_deployment:
     deployment.new('dnsmasq', 1, $.dnsmasq_container) +
     deployment.mixin.metadata.withNamespace($._config.namespace) +
+    deployment.spec.template.metadata.withAnnotations({
+      'cni.projectcalico.org/ipAddrs': '["10.42.0.2"]'
+    }) +
     k.util.configMapVolumeMount($.dnsmasq_cm, '/etc/dnsmasq.d'),
 }
