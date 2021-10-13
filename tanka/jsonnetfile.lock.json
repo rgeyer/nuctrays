@@ -8,8 +8,8 @@
           "subdir": "production/tanka/grafana-agent"
         }
       },
-      "version": "f4097f0ec7b52be30ec50c27b7d3fc05b875b14a",
-      "sum": "+Ci9jSOXIxgU8Id1x8QQT1Yo2QV3HdEKVwIEpyAv2QA="
+      "version": "d8eb1b5d31e550d68bf92ade223e2d87a095a989",
+      "sum": "0sdnahtvVyN+7V+VtIyA3+dCn7lTKInYiS3yxwG32Yo="
     },
     {
       "source": {
@@ -18,18 +18,18 @@
           "subdir": "ksonnet-util"
         }
       },
-      "version": "188bf1e03f0c7dcaaa53b916459a8afdc24a2c83",
-      "sum": "jelt5QWEerVPLHHZN6Ga0B4OQ/MLBl+OLj3kVzTET+Y="
+      "version": "09ddf8eb59edc2dacccf7a96d20d97b240ae170a",
+      "sum": "fFVlCoa/N0qiqTbDhZAEdRm2Vv76Z9Clxp3/haJ+PyA="
     },
     {
       "source": {
         "git": {
-          "remote": "https://github.com/jsonnet-libs/k8s-alpha.git",
+          "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
           "subdir": "1.19"
         }
       },
-      "version": "50fa5748382fbc0d6fb34105835fd07acaf0195f",
-      "sum": "OXTug8dGtUKG5MGkSdEvMllGfPitqG1kdTk4pPVSH8k="
+      "version": "f47562c4e3bfaf46a5a5bc6a9e1e76a4fc76c18e",
+      "sum": "m/53207lTQJGAA9H2D7SrM+qIMJxHxXPzlsx3GuyYLg="
     },
     {
       "source": {
