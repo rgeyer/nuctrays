@@ -1,0 +1,13 @@
+{
+  "apiVersion": "tanka.dev/v1alpha1",
+  "kind": "Environment",
+  "metadata": {
+    "name": "environments/kube-state-metrics"
+  },
+  "spec": {
+    "apiServer": "https://192.168.42.100:6443",
+    "namespace": "kube-system",
+    "resourceDefaults": {},
+    "expectVersions": {}
+  }
+}

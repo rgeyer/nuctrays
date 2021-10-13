@@ -2,6 +2,7 @@ local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet'
 local grafana_agent = import 'github.com/rgeyer/agent/production/tanka/grafana-agent/v1/main.libsonnet';
 local ga_scrape_k8s = import 'grafana-agent/v1/internal/kubernetes_instance.libsonnet';
 
+local config = import 'config.libsonnet';
 local secrets = import 'secrets.libsonnet';
 
 local loki_config = import 'loki_config.libsonnet';
@@ -35,7 +36,7 @@ local static_scrape_configs = {
   ],
 };
 
-secrets {
+config + secrets {
   _config+:: {
     namespace: 'grafana-agent',
   },
@@ -57,7 +58,7 @@ secrets {
       },
     }) +
     grafana_agent.withPrometheusInstances(ga_scrape_k8s.newKubernetesScrapeInstance(config=ga_scrape_k8s.kubernetesScrapeInstanceConfig,
-    namespace='kube-system') {
+    namespace=$._config.kube_state_metrics.namespace) {
       scrape_configs: std.map(function(config) config {
         relabel_configs+: [{
           target_label: 'cluster',
