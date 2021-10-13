@@ -1,5 +1,6 @@
 local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
 local grafana_agent = import 'github.com/rgeyer/agent/production/tanka/grafana-agent/v1/main.libsonnet';
+local ga_scrape_k8s = import 'grafana-agent/v1/internal/kubernetes_instance.libsonnet';
 
 local secrets = import 'secrets.libsonnet';
 
@@ -55,7 +56,8 @@ secrets {
         },
       },
     }) +
-    grafana_agent.withPrometheusInstances(grafana_agent.scrapeInstanceKubernetes {
+    grafana_agent.withPrometheusInstances(ga_scrape_k8s.newKubernetesScrapeInstance(config=ga_scrape_k8s.kubernetesScrapeInstanceConfig,
+    namespace='kube-system') {
       scrape_configs: std.map(function(config) config {
         relabel_configs+: [{
           target_label: 'cluster',
