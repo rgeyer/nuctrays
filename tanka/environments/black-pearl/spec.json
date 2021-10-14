@@ -5,8 +5,8 @@
     "name": "environments/black-pearl"
   },
   "spec": {
-    "apiServer": "",
-    "namespace": "default",
+    "apiServer": "https://192.168.42.100:6443",
+    "namespace": "plex",
     "resourceDefaults": {},
     "expectVersions": {}
   }
