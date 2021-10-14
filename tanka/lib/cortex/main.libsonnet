@@ -9,15 +9,19 @@ local configMap = k.core.v1.configMap,
       service = k.core.v1.service;
 
 {
-  new(namespace='', pvcName=''):: {
+  new(namespace='', pvcName='', s3_rules_host='', s3_rules_bucket=''):: {
     local this = self,
 
     _images:: {
       cortex: 'cortexproject/cortex:v1.9.0',
     },
 
-    _config:: (import './cortex-config.libsonnet'),
+    _config:: (import './cortex-config.libsonnet') + {
+      s3_rules_host:: s3_rules_host,
+      s3_rules_bucket:: s3_rules_bucket,
+    },
 
+    // TODO: This should technically be a secret now that it contains minio creds
     configMap:
       configMap.new('cortex-config') +
       configMap.mixin.metadata.withNamespace(namespace) +

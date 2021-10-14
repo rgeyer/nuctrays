@@ -38,5 +38,12 @@
           'name': 'kube-state-metrics',
       },      
     },
+
+    minio+:: {
+      pvc: {
+        nfsHost: '192.168.42.101',
+        nfsPath: '/mnt/brick/nfs/minio',
+      },
+    },
   }
 }

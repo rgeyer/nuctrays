@@ -74,12 +74,17 @@
   },
 
   ruler: {
+    rule_path: '/tmp/cortex/rules-tmp',
     enable_api: true,
     enable_sharding: false,
     storage: {
-      type: 'local',
-      'local': {
-        directory: '/tmp/cortex/rules',
+      type: 's3',
+      s3: {
+        s3: $.s3_rules_host,
+        bucketnames: $.s3_rules_bucket,
+        s3forcepathstyle: true,
+        endpoint: 'minio:9000',
+        insecure: true,
       },
     },
   },
