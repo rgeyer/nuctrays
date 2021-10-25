@@ -23,7 +23,7 @@ local static_scrape_configs = {
         ca_file: '/etc/ssl/etcd/ssl/ca.pem',
         cert_file: '/etc/ssl/etcd/ssl/node-18n1l.pem',
         key_file: '/etc/ssl/etcd/ssl/node-18n1l-key.pem',
-        insecure_skip_verify: false
+        insecure_skip_verify: false,
       },
     },
     {
@@ -47,7 +47,7 @@ config + secrets {
 
     grafana_agent.new('agent', $._config.namespace) +
 
-    # Prometheus Config
+    // Prometheus Config
     grafana_agent.withPrometheusConfig({
       wal_directory: '/var/lib/agent/data',
       global: {
@@ -58,7 +58,7 @@ config + secrets {
       },
     }) +
     grafana_agent.withPrometheusInstances(ga_scrape_k8s.newKubernetesScrapeInstance(config=ga_scrape_k8s.kubernetesScrapeInstanceConfig,
-    namespace=$._config.kube_state_metrics.namespace) {
+                                                                                    namespace=$._config.kube_state_metrics.namespace) {
       scrape_configs: std.map(function(config) config {
         relabel_configs+: [{
           target_label: 'cluster',
@@ -68,17 +68,26 @@ config + secrets {
     }) +
     grafana_agent.withRemoteWrite($._config.grafana_agent.cortex_remote_write) +
 
-    # Loki Config
+    // Loki Config
     grafana_agent.withLokiConfig(loki_config) +
-    grafana_agent.withLokiClients(grafana_agent.newLokiClient({
-      scheme: 'https',
-      hostname: $._config.hosted_grafana_orgs.ryangeyer.hosted_logs_host,
-      username: $._config.hosted_grafana_orgs.ryangeyer.hosted_logs_tenant,
-      password: $._config.hosted_grafana_orgs.ryangeyer.metrics_pub_key,
-      external_labels: {cluster: cluster_label},
-    })) +
+    grafana_agent.withLokiClients([
+      // To Grafana Cloud
+      grafana_agent.newLokiClient({
+        scheme: 'https',
+        hostname: $._config.hosted_grafana_orgs.ryangeyer.hosted_logs_host,
+        username: $._config.hosted_grafana_orgs.ryangeyer.hosted_logs_tenant,
+        password: $._config.hosted_grafana_orgs.ryangeyer.metrics_pub_key,
+        external_labels: { cluster: cluster_label },
+      }),
+      // To nuctray local
+      grafana_agent.newLokiClient({
+        scheme: 'http',
+        hostname: 'loki.loki.svc.cluster.local:3100',
+      }),
+    ]) +
 
-    # Integration Config
+
+    // Integration Config
     grafana_agent.withIntegrations({
       node_exporter: {
         enabled: true,
@@ -100,8 +109,8 @@ config + secrets {
     grafana_agent.withRemoteWrite($._config.grafana_agent.cortex_remote_write) +
     {
       agent+: {
-        agent+: deployment.spec.template.spec.withNodeSelector({etcdnode: "true"}) +
-          k.util.hostVolumeMount('ssl', '/etc/ssl/etcd/ssl', '/etc/ssl/etcd/ssl', readOnly=true),
-      }
+        agent+: deployment.spec.template.spec.withNodeSelector({ etcdnode: 'true' }) +
+                k.util.hostVolumeMount('ssl', '/etc/ssl/etcd/ssl', '/etc/ssl/etcd/ssl', readOnly=true),
+      },
     },
 }

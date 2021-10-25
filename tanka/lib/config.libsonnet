@@ -45,5 +45,12 @@
         nfsPath: '/mnt/brick/nfs/minio',
       },
     },
+
+    loki+:: {
+      pvc: {
+        nfsHost: '192.168.42.101',
+        nfsPath: '/mnt/brick/nfs/loki',
+      }
+    },
   }
 }
