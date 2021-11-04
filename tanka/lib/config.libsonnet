@@ -52,5 +52,17 @@
         nfsPath: '/mnt/brick/nfs/loki',
       }
     },
+
+    cronjobs+:: {
+      rclone+:: {
+        'bignasty-backups-nuctray': '0 5 * * *', # 10p Pacific/5a UTC Daily
+        'bignasty-code': '5 5 * * *', # 10:05p Pacific/5:05a UTC Daily
+        'bignasty-download': '10 5 * * *', # 10:10p Pacific/5:10a UTC Daily
+        'bignasty-homes': '15 5 * * *', # 10:15p Pacific/5:15a UTC Daily
+        'bignasty-kubestore': '20 5 * * *', # 10:20p Pacific/5:20a UTC Daily        
+        'bignasty-multimedia': '25 5 * * *', # 10:25p Pacific/5:25a UTC Daily
+        'bignasty-public': '30 5 * * *', # 10:30p Pacific/5:30a UTC Daily
+      },
+    },
   }
 }
