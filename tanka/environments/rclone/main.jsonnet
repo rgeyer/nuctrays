@@ -12,10 +12,12 @@ local container = k.core.v1.container,
       service = k.core.v1.service,
       cronJob = k.batch.v1beta1.cronJob;
 
+local traefikingress = import 'traefik/ingress.libsonnet';
+
 local namespace = 'rclone';
 
 config + secrets {
-  bkup_job(name, src, dest, schedule)::{
+  bkup_job(name, src, dest, schedule):: {
     container::
       container.new('rclone', $._config.rclone.image) +
       container.withArgsMixin([
@@ -111,4 +113,13 @@ config + secrets {
   // kubestorebkup: $.bkup_job('bignasty-kubestore', 'kubestore', 'gsuite-drive:/BigNASty/kubestore', $._config.cronjobs.rclone['bignasty-kubestore']),
   multimediabkup: $.bkup_job('bignasty-multimedia', 'Multimedia', 'gsuite-drive:/BigNASty/Multimedia', $._config.cronjobs.rclone['bignasty-multimedia']),
   publicbkup: $.bkup_job('bignasty-public', 'Public', 'gsuite-drive:/BigNASty/Public', $._config.cronjobs.rclone['bignasty-public']),
+
+  ingress: traefikingress.newIngressRoute(
+    'rclone', 
+    namespace, 
+    'rclone.ryangeyer.com', 
+    'rclone', 
+    '5572', 
+    false, 
+    true),
 }
