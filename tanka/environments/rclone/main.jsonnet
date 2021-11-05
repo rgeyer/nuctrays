@@ -119,7 +119,7 @@ config + secrets {
     namespace, 
     'rclone.ryangeyer.com', 
     'rclone', 
-    '5572', 
+    5572, 
     false, 
     true),
 }
