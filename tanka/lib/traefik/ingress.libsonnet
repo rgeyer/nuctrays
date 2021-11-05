@@ -1,5 +1,5 @@
 {
-  newIngressRoute(name='', namespace='', host='', svcName='', svcPort='', public='', secure=''):: {
+  newIngressRoute(name='', namespace='', host='', svcName='', svcPort='', public=false, secure=true):: {
     ingress: {
       apiVersion: 'traefik.containo.us/v1alpha1',
       kind: 'IngressRoute',
