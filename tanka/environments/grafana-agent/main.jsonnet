@@ -33,6 +33,59 @@ local static_scrape_configs = {
         targets: ['192.168.42.115:9500'],
       }],
     },
+    {
+      job_name: 'snmp/cisco_switch',
+      static_configs: [
+        {
+          targets: ['192.168.1.161', '196.168.1.2'],
+        },
+      ],
+      metrics_path: '/snmp',
+      params: {
+        module: ['cisco_switch'],
+      },
+      relabel_configs: [
+        {source_labels: ['__address__'],target_label: '__param_target'},
+        {source_labels: ['__param_target'],target_label: 'instance'},
+        {target_label: '__address__', replacement: 'snmp-exporter.default.svc.cluster.local:9116'},
+      ],
+    },
+    {
+      job_name: 'snmp/edgerouter',
+      static_configs: [
+        {
+          targets: ['192.168.1.1'],
+        },
+      ],
+      metrics_path: '/snmp',
+      params: {
+        module: ['edgerouter'],
+      },
+      relabel_configs: [
+        {source_labels: ['__address__'],target_label: '__param_target'},
+        {source_labels: ['__param_target'],target_label: 'instance'},
+        {target_label: '__address__', replacement: 'snmp-exporter.default.svc.cluster.local:9116'},
+      ],
+    },
+    {
+      job_name: 'snmp/qnap',      
+      scrape_interval: '120s',
+      scrape_timeout: '60s',
+      static_configs: [
+        {
+          targets: ['192.168.1.10'],
+        },
+      ],
+      metrics_path: '/snmp',
+      params: {
+        module: ['qnap'],
+      },
+      relabel_configs: [
+        {source_labels: ['__address__'],target_label: '__param_target'},
+        {source_labels: ['__param_target'],target_label: 'instance'},
+        {target_label: '__address__', replacement: 'snmp-exporter.default.svc.cluster.local:9116'},
+      ],
+    },
   ],
 };
 
