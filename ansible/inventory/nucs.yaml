@@ -49,11 +49,11 @@ all:
         18n1r:
         18n2l:
         18n2r:
-    kube-master:
+    kube_control_plane:
       hosts:
         18n1l:
         18n1r:
-    kube-node:
+    kube_node:
       hosts:
         18tc1:
         18n1l:
@@ -67,7 +67,7 @@ all:
         18n2l:
     k8s-cluster:
       children:
-        kube-master:
-        kube-node:
+        kube_control_plane:
+        kube_node:
     calico-rr:
       hosts: {}
