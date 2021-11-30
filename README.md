@@ -66,3 +66,18 @@ Had to reboot after above.
 
 https://typhoon.psdn.io/topics/hardware/
 https://docs.ansible.com/ansible/latest/collections/community/network/edgeos_config_module.html
+
+## Ansible
+TODO
+
+* Don't forget to grab submodules
+
+Create a docker image that includes what I need, and can be executed like `docker run --rm -it -v $(pwd):/an -v ~/.ssh:/root/.ssh --entrypoint sh willhallonline/ansible`
+
+Needs;
+`ansible-galaxy collection install community.general`
+`ansible-galaxy collection install community.crypto`
+`ansible-galaxy collection install ansible.posix`
+`ansible-galaxy install geerlingguy.nfs`
+`ansible-galaxy collection install ansible.netcommon`
+`pip install netaddr`
