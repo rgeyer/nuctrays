@@ -86,6 +86,15 @@ local static_scrape_configs = {
         {target_label: '__address__', replacement: 'snmp-exporter.default.svc.cluster.local:9116'},
       ],
     },
+    {
+      job_name: 'esphome',
+      scheme: 'http',
+      static_configs: [
+        {
+          targets: ['192.168.1.242', '192.168.1.243'],
+        },
+      ],
+    },
   ],
 };
 
