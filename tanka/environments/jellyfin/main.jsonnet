@@ -37,7 +37,9 @@ local namespace = 'plex';
     container.withVolumeMountsMixin([
       volumeMount.new('jellyfinmedia', '/data'),
       volumeMount.new('jellyfinconfig', '/config'),
-    ]),
+    ]) +
+    container.resources.withRequests({memory: "2.4G"}) +
+    container.resources.withLimits({memory: "3G"}),
 
   statefulset:
     statefulSet.new('jellyfin', 1, $.container, podLabels={name: 'jellyfin'}) +
