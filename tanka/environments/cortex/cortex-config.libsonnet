@@ -12,6 +12,7 @@
   },
 
   distributor: {
+    remote_timeout: '20s',
     shard_by_all_labels: true,
     pool: {
       health_check_ingesters: true,
