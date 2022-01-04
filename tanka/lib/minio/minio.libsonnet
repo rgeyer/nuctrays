@@ -11,9 +11,12 @@ local container = k.core.v1.container,
   new(namespace='default', key='', secret='', pvcName=''):: {
     local this = self,
     minio_container::
-      container.new('minio', 'minio/minio:RELEASE.2021-06-07T21-40-51Z') +
+      container.new('minio', 'minio/minio:RELEASE.2021-12-29T06-49-06Z') +
       container.withPorts(
-        [containerPort.new('minio', 9000)],
+        [
+          containerPort.new('api', 9000),
+          containerPort.new('console', 9001),
+        ],
       ) +
       // TODO: The key and secret should be actually *in* a secret, and brought in
       // with an envfrom
@@ -30,11 +33,19 @@ local container = k.core.v1.container,
           name: 'MINIO_PROMETHEUS_AUTH_TYPE',
           value: 'public',
         },
+        {
+          name: 'CONSOLE_SECURE_TLS_REDIRECT',
+          value: 'false',
+        },
+        {
+          name: 'MINIO_BROWSER_REDIRECT_URL',
+          value: 'https://minio.ryangeyer.com',
+        },
       ]) + container.withCommand(
         ['/bin/bash', '-c']
       ) + container.withArgs(
         // Create the /data/cortex folder to bootstrap cortex ruler
-        ['mkdir -p /data/cortex && /usr/bin/minio server /data']
+        ['mkdir -p /data/cortex && mkdir -p /data/cortexblocks && /opt/bin/minio server /data --console-address :9001']
       ) +
       if pvcName == '' then {} else container.withVolumeMountsMixin(
           volumeMount.new('minio-data', '/data')
