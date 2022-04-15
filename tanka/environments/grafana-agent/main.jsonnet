@@ -157,6 +157,10 @@ config + secrets {
         sysfs_path: '/host/sys',
         procfs_path: '/host/proc',
       },
+      redis_exporter: {
+        enabled: true,
+        redis_addr: 'redis.mad.svc.cluster.local:6379',
+      },
     }),
 
   agent_deployment:
