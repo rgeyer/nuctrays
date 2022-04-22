@@ -16,8 +16,8 @@
 
     backups+:: {
       pvc: {
-        nfsHost: '192.168.42.10',
-        nfsPath: '/Backups/nuctray/eighteen',
+        nfsHost: '192.168.42.100',
+        nfsPath: '/mnt/brick/nfs/traybkups',
       }
     },
 
