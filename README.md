@@ -67,6 +67,17 @@ Had to reboot after above.
 https://typhoon.psdn.io/topics/hardware/
 https://docs.ansible.com/ansible/latest/collections/community/network/edgeos_config_module.html
 
+# Boostrapping
+
+## Tanka
+ensure that you have jb, helm and tanka installed
+
+```
+helm repo add bitnami https://charts.bitnami.com/bitnami # Not sure this is necessary, it might not be
+jb install
+tk tool charts vendor
+```
+
 ## Ansible
 TODO
 

@@ -1,5 +1,14 @@
 {
   _config+:: {
+    mysql+:: {
+      secondary: {
+        pvc: {
+          nfsHost: '192.168.42.103',
+          nfsPath: '/mnt/brick/nfs/mysql-secondary',
+        },
+      },
+    },
+
     certbot+:: {
       pvc: {
         nfsHost: '192.168.42.10',
