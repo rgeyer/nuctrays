@@ -75,9 +75,16 @@ TODO
 Create a docker image that includes what I need, and can be executed like `docker run --rm -it -v $(pwd):/an -v ~/.ssh:/root/.ssh --entrypoint sh willhallonline/ansible`
 
 Needs;
+```
+apk add build-base
+  12 apk add python3-dev
+  14 apk add libffi-dev
+  16 apk add openssl
+  18 apk add openssl-dev
+```
+`pip install netaddr` or `pip install -r ansible/kubespray/requirements.txt`
 `ansible-galaxy collection install community.general`
 `ansible-galaxy collection install community.crypto`
 `ansible-galaxy collection install ansible.posix`
 `ansible-galaxy install geerlingguy.nfs`
 `ansible-galaxy collection install ansible.netcommon`
-`pip install netaddr`
