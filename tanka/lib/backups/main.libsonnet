@@ -20,6 +20,7 @@ local nfspvc = import 'k8sutils/nfspvc.libsonnet',
     configMap.withData({
       'common.sh': importstr './scripts/common.sh',
       'etcdbak.sh': importstr './scripts/etcdbak.sh',
+      'mysqlbak.sh': importstr './scripts/mysqlbak.sh',
     }),
 
   etcd_container::
