@@ -54,6 +54,7 @@ config + secrets + {
 
   // MAD requires sql_mode="NO_ENGINE_SUBSTITUTION" in the mysql.cnf. I don't see an easy way to add decorations to the configmap, so I added this manually.
   // Need to eventually "properly" automate that.
+  // Looks like it can be set as a CLI arg, which is exposed as [primary|secondary].extraFlags - https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html,
   mysql: helm.template("mysql", "../../charts/mysql", {
     namespace: ns,
     values: {
