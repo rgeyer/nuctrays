@@ -2,19 +2,20 @@ local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet'
 local registry = import 'registry/main.libsonnet';
 
 local nfspvc = import 'k8sutils/nfspvc.libsonnet';
+local config = import 'config.libsonnet';
 
 local container = k.core.v1.container,
       deployment = k.apps.v1.deployment;
 
-{
+config {
   _images+:: {
     traefik: 'traefik:v2.2',
   },
 
   registry_pvc: nfspvc.new(
     'default',
-    '192.168.42.101',
-    '/mnt/brick/nfs/registry',
+    $._config.registry.pvc.nfsHost,
+    $._config.registry.pvc.nfsPath,
     'registry',
   ),
 
@@ -22,15 +23,15 @@ local container = k.core.v1.container,
 
   traefik_pvc: nfspvc.new(
     'traefik',
-    '192.168.42.100',
-    '/mnt/brick/nfs/traefik',
+    $._config.traefik.private.pvc.nfsHost,
+    $._config.traefik.private.pvc.nfsPath,
     'traefik',
   ),  
 
   ptraefik_pvc: nfspvc.new(
     'ptraefik',
-    '192.168.42.100',
-    '/mnt/brick/nfs/traefik',
+    $._config.traefik.public.pvc.nfsHost,
+    $._config.traefik.public.pvc.nfsPath,
     'ptraefik',
   ),
 

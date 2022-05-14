@@ -62,6 +62,28 @@
       }
     },
 
+    registry+:: {
+      pvc: {
+        nfsHost: '192.168.42.101',
+        nfsPath: '/mnt/brick/nfs/registry',
+      },
+    },
+
+    traefik+:: {
+      private: {
+        pvc: {
+          nfsHost: '192.168.42.100',
+          nfsPath: '/mnt/brick/nfs/traefik',
+        },
+      },
+      public: {
+        pvc: {
+          nfsHost: '192.168.42.100',
+          nfsPath: '/mnt/brick/nfs/ptraefik',
+        },
+      },
+    },
+
     cronjobs+:: {
       rclone+:: {
         'bignasty-backups-nuctray': '0 5 * * *', # 10p Pacific/5a UTC Daily
