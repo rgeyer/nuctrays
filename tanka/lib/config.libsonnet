@@ -84,6 +84,10 @@
       },
     },
 
+    mqtt+:: {
+      pvc: $._config.certbot.pvc,
+    },
+
     cronjobs+:: {
       rclone+:: {
         'bignasty-backups-nuctray': '0 5 * * *', # 10p Pacific/5a UTC Daily
