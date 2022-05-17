@@ -1,5 +1,4 @@
-
-local tanka = import "github.com/grafana/jsonnet-libs/tanka-util/main.libsonnet";
+local tanka = import 'github.com/grafana/jsonnet-libs/tanka-util/main.libsonnet';
 local helm = tanka.helm.new(std.thisFile);
 
 local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
@@ -18,21 +17,16 @@ config + secrets + {
   primary_pv:
     pv.new('mysqlprimary-pv') +
     pv.spec.withAccessModes('ReadWriteOnce') +
-    pv.spec.withCapacity({'storage': '100Gi'}) +
+    pv.spec.withCapacity({ storage: '100Gi' }) +
     pv.spec.withStorageClassName('manual') +
     pv.spec.hostPath.withPath('/opt/kubehostpaths/mysql-primary'),
 
   secondary_pv:
     pv.new('mysqlsecondary-pv') +
     pv.spec.withAccessModes('ReadWriteOnce') +
-    pv.spec.withCapacity({'storage': '1Gi'}) +
-    pv.spec.withStorageClassName('nfs-storage') +
-    pv.spec.withMountOptions([
-      'hard',
-      'nfsvers=4.1',
-    ]) +
-    pv.spec.nfs.withPath($._config.mysql.secondary.pvc.nfsPath) +
-    pv.spec.nfs.withServer($._config.mysql.secondary.pvc.nfsHost) +
+    pv.spec.withCapacity({ storage: '101Gi' }) +
+    pv.spec.withStorageClassName('manual') +
+    pv.spec.hostPath.withPath('/opt/kubehostpaths/mysql-replica') +
     pv.metadata.withLabels({ reservation: 'mysqlsecondary' }),
 
   primary_pvc:
@@ -40,7 +34,7 @@ config + secrets + {
     pvc.spec.withAccessModes('ReadWriteOnce') +
     pvc.spec.withStorageClassName('manual') +
     pvc.spec.withVolumeName('mysqlprimary-pv') +
-    pvc.spec.resources.withRequests({'storage': '100Gi'}) +
+    pvc.spec.resources.withRequests({ storage: '100Gi' }) +
     pvc.mixin.metadata.withNamespace(ns),
 
   mysql_secret:
@@ -52,10 +46,7 @@ config + secrets + {
     }) +
     secret.mixin.metadata.withNamespace(ns),
 
-  // MAD requires sql_mode="NO_ENGINE_SUBSTITUTION" in the mysql.cnf. I don't see an easy way to add decorations to the configmap, so I added this manually.
-  // Need to eventually "properly" automate that.
-  // Looks like it can be set as a CLI arg, which is exposed as [primary|secondary].extraFlags - https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html,
-  mysql: helm.template("mysql", "../../charts/mysql", {
+  mysql: helm.template('mysql', '../../charts/mysql', {
     namespace: ns,
     values: {
       architecture: 'replication',
@@ -69,18 +60,24 @@ config + secrets + {
         persistence: {
           existingClaim: 'mysqlprimary-pvc',
         },
+        extraFlags: '--sql-mode=NO_ENGINE_SUBSTITUTION',
+        extraEnvVars: [
+          { name: 'TZ', value: 'America/Los_Angeles' },
+        ],
       },
       secondary: {
         persistence: {
           // For some reason, the chart does not support 'existingClaim', but does allow a selector for an existing pv ¯\_(ツ)_/¯
-          storageClass: 'nfs-storage',
-          size: '1Gi',
+          storageClass: 'manual',
+          size: '101Gi',
           selector: {
             matchLabels: { reservation: 'mysqlsecondary' },
           },
-        },        
+        },
       },
-    }
-  })
+      metrics: {
+        enabled: true,
+      },
+    },
+  }),
 }
-
