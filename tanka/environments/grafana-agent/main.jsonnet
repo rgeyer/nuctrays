@@ -95,6 +95,15 @@ local static_scrape_configs = {
         },
       ],
     },
+    {
+      job_name: 'mysqlexporters',
+      scheme: 'http',
+      static_configs: [
+        {
+          targets: ['mysql-metrics.mysql.svc.cluster.local:9104'],
+        },
+      ],
+    },
   ],
 };
 
