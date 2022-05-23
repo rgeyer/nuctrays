@@ -8,8 +8,8 @@
           "subdir": "production/tanka/grafana-agent"
         }
       },
-      "version": "d8eb1b5d31e550d68bf92ade223e2d87a095a989",
-      "sum": "0sdnahtvVyN+7V+VtIyA3+dCn7lTKInYiS3yxwG32Yo="
+      "version": "551defcb34fd2c14ccad0fc1d0d63d2e487790a9",
+      "sum": "gE9GArW7GX0CnKE9P3UOJ+1LQoIQFUuyupIlJVdRvWI="
     },
     {
       "source": {
@@ -18,8 +18,8 @@
           "subdir": "ksonnet-util"
         }
       },
-      "version": "09ddf8eb59edc2dacccf7a96d20d97b240ae170a",
-      "sum": "fFVlCoa/N0qiqTbDhZAEdRm2Vv76Z9Clxp3/haJ+PyA="
+      "version": "70204d02a271e7362187d2ddba686058cfa7827b",
+      "sum": "xo1A7iYvJ7OZ64q2dOZY0G8FGHHt+t/+vEJW3bnXHyk="
     },
     {
       "source": {
@@ -28,7 +28,7 @@
           "subdir": "tanka-util"
         }
       },
-      "version": "c26cc0815dfd32e84d1caba3d9bbb75f2b119937",
+      "version": "70204d02a271e7362187d2ddba686058cfa7827b",
       "sum": "AGgjH6IJe/1qwNtxFIiG8V1uyOJZascEydQsNrfPQ4c="
     },
     {
@@ -48,8 +48,8 @@
           "subdir": "1.19"
         }
       },
-      "version": "f47562c4e3bfaf46a5a5bc6a9e1e76a4fc76c18e",
-      "sum": "m/53207lTQJGAA9H2D7SrM+qIMJxHxXPzlsx3GuyYLg="
+      "version": "78379f6b2c1438b4467f47d04e08f16b4b22e5ba",
+      "sum": "JUHdCuW+vft0EOL9RU0F3EAixZwsZ/G0CY8ixavo21w="
     },
     {
       "source": {
@@ -58,18 +58,8 @@
           "subdir": "jsonnet/kube-state-metrics"
         }
       },
-      "version": "1e9d07bfe1509b04f6f5183c4635da2a88d14cbd",
-      "sum": "U1wzIpTAtOvC1yj43Y8PfvT0JfvnAcMfNH12Wi+ab0Y="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/rgeyer/agent.git",
-          "subdir": "production/tanka/grafana-agent"
-        }
-      },
-      "version": "5735304fcf6f21d1c758e089bf55aaad7cf022f1",
-      "sum": "2bLnNnecHrFNPF9g7FLT5YZ/BQ5xMc8tH+uoCzBgGIo="
+      "version": "c02c4cd32fb7d0f792c757c86b267ea633b52117",
+      "sum": "P0dCnbzyPScQGNXwXRcwiPkMLeTq0IPNbSTysDbySnM="
     }
   ],
   "legacyImports": false

@@ -1,6 +1,6 @@
 # ~stolen~ Borrowed from https://github.com/grafana/agent/blob/main/example/k3d/lib/default/loki_config.libsonnet
 
-local grafana_agent = import 'github.com/rgeyer/agent/production/tanka/grafana-agent/v1/main.libsonnet';
+local grafana_agent = import 'grafana-agent/v1/main.libsonnet';
 
 grafana_agent.scrapeKubernetesLogs {
   local pipeline_stages = [
