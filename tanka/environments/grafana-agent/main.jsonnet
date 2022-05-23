@@ -196,12 +196,12 @@ config + secrets {
         agent+: deployment.spec.template.spec.withNodeSelector({ etcdnode: 'true' }) +
                 k.util.hostVolumeMount('ssl', '/etc/ssl/etcd/ssl', '/etc/ssl/etcd/ssl', readOnly=true),
       },
-    } +
-    {
-      config+:: {
-          server+: {
-            log_level: 'debug',
-          },
-      },
-    },
+    }, // +
+    // {
+    //   config+:: {
+    //     server+: {
+    //       log_level: 'debug',
+    //     },
+    //   },
+    // },
 }
