@@ -11,7 +11,7 @@ secrets {
   _config+:: {
     namespace: 'mad',
     namefetcher+:: {
-      dbhost: 'mysql.dbs.svc.cluster.local',
+      dbhost: 'mysql-primary.mysql.svc.cluster.local',
       dbname: 'madpoc',
     },
 
