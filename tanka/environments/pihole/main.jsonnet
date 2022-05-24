@@ -60,7 +60,7 @@ local container = k.core.v1.container,
             },
           ],
         },
-        topologyKey: 'topology.kubernetes.io/zone',
+        topologyKey: 'kubernetes.io/os',
       },
     ]) +
     k.util.configMapVolumeMount($.dnsmasq_cm, '/etc/dnsmasq.d'),
