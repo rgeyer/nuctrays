@@ -39,6 +39,7 @@ local container = k.core.v1.container,
     deployment.spec.template.metadata.withAnnotations({
       'cni.projectcalico.org/ipAddrs': '["10.42.0.2"]'
     }) +
+    deployment.spec.strategy.withType('Recreate') +
     k.util.configMapVolumeMount($.dnsmasq_cm, '/etc/dnsmasq.d'),    
 
   dnsmasq2_deployment:
@@ -47,5 +48,20 @@ local container = k.core.v1.container,
     deployment.spec.template.metadata.withAnnotations({
       'cni.projectcalico.org/ipAddrs': '["10.42.0.3"]'
     }) +
+    deployment.spec.strategy.withType('Recreate') +
+    deployment.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution([
+      {
+        labelSelector: {
+          matchExpressions: [
+            {
+              key: 'name',
+              operator: 'In',
+              values: ['dnsmasq1'],
+            },
+          ],
+        },
+        topologyKey: 'topology.kubernetes.io/zone',
+      },
+    ]) +
     k.util.configMapVolumeMount($.dnsmasq_cm, '/etc/dnsmasq.d'),
 }
