@@ -13,10 +13,10 @@ config {
     container.new('namefetcher', $._images.namefetcher) +
     container.withEnvFrom(envFrom.secretRef.withName('namefetcher')) +
     container.withEnv([
-      envVar.new('DB_HOST', $._config.namefetcher.dbhost),
-      envVar.new('DB_NAME', $._config.namefetcher.dbname),
-      envVar.fromSecretRef('DB_USER', $._config.madmysql.secretname, $._config.madmysql.secretuserkey),
-      envVar.fromSecretRef('DB_PASS', $._config.madmysql.secretname, $._config.madmysql.secretpasskey),
+      envVar.new('NF_DB_HOST', $._config.namefetcher.dbhost),
+      envVar.new('NF_DB_DATABASE', $._config.namefetcher.dbname),
+      envVar.fromSecretRef('NF_DB_USER', $._config.madmysql.secretname, $._config.madmysql.secretuserkey),
+      envVar.fromSecretRef('NF_DB_PASSWORD', $._config.madmysql.secretname, $._config.madmysql.secretpasskey),
     ]),
 
   namefetcher_cronjob:
@@ -27,8 +27,8 @@ config {
   namefetcher_secret:
     secret.new('namefetcher', {}) +
     secret.withStringData({
-      'API_TOKEN': $._config.namefetcher.api_token,
-      'URI': $._config.namefetcher.uri,
+      'NF_TOKEN': $._config.namefetcher.api_token,
+      'NF_URL': $._config.namefetcher.uri,
     }) +
     secret.mixin.metadata.withNamespace($._config.namespace),
 }

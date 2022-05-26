@@ -12,7 +12,7 @@ local clusterRole = k.rbac.v1.clusterRole,
 
 secrets {
   _images+:: {
-    namefetcher: 'registry.ryangeyer.com/namefetcher:latest',
+    namefetcher: 'registry.ryangeyer.com/namefetcher:upstream',
     redis: 'redis:latest',
     maddog: 'bitnami/kubectl:1.24'
   },
