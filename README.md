@@ -94,8 +94,10 @@ apk add build-base
   18 apk add openssl-dev
 ```
 `pip install netaddr` or `pip install -r ansible/kubespray/requirements.txt`
-`ansible-galaxy collection install community.general`
-`ansible-galaxy collection install community.crypto`
-`ansible-galaxy collection install ansible.posix`
-`ansible-galaxy install geerlingguy.nfs`
-`ansible-galaxy collection install ansible.netcommon`
+```
+ansible-galaxy collection install community.general
+ansible-galaxy collection install community.crypto
+ansible-galaxy collection install ansible.posix
+ansible-galaxy install geerlingguy.nfs
+ansible-galaxy collection install ansible.netcommon
+```
