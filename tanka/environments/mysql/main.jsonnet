@@ -60,12 +60,16 @@ config + secrets + {
         persistence: {
           existingClaim: 'mysqlprimary-pvc',
         },
-        extraFlags: '--sql-mode=NO_ENGINE_SUBSTITUTION',
+        extraFlags: '--sql-mode=NO_ENGINE_SUBSTITUTION --binlog-expire-logs-seconds=172800',
         extraEnvVars: [
           { name: 'TZ', value: 'America/Los_Angeles' },
         ],
       },
       secondary: {
+        // This is stupid, because it runs on the same box, but I don't have anything else with fast enough SSD to keep up.          
+        nodeSelector: {
+          'kubernetes.io/hostname': '18mad1',
+        },
         persistence: {
           // For some reason, the chart does not support 'existingClaim', but does allow a selector for an existing pv ¯\_(ツ)_/¯
           storageClass: 'manual',
@@ -74,6 +78,10 @@ config + secrets + {
             matchLabels: { reservation: 'mysqlsecondary' },
           },
         },
+        extraFlags: '--binlog-expire-logs-seconds=172800',
+        extraEnvVars: [
+          { name: 'TZ', value: 'America/Los_Angeles' },
+        ],
       },
       metrics: {
         enabled: true,
