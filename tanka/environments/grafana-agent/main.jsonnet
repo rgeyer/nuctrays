@@ -113,6 +113,19 @@ local static_scrape_configs = {
         },
       ],
     },
+    {
+      job_name: 'qnap/rclone',
+      scheme: 'http',
+      static_configs: [
+        {
+          targets: ['192.168.1.10:5572'],
+        },
+      ],
+      basic_auth: {
+        username: secrets._config.qnap.rclone.user,
+        password: secrets._config.qnap.rclone.pass,
+      },
+    },
   ],
 };
 
