@@ -5,6 +5,7 @@ local k = import 'ksonnet-util/kausal.libsonnet';
 
 local clusterRole = k.rbac.v1.clusterRole,
       container = k.core.v1.container,
+      configMap = k.core.v1.configMap,
       cronJob = k.batch.v1beta1.cronJob,
       policyRule = k.rbac.v1.policyRule,
       clusterRoleBinding = k.rbac.v1.clusterRoleBinding,
@@ -14,7 +15,8 @@ secrets {
   _images+:: {
     namefetcher: 'registry.ryangeyer.com/namefetcher:upstream',
     redis: 'redis:latest',
-    maddog: 'bitnami/kubectl:1.24'
+    maddog: 'bitnami/kubectl:1.24',
+    mysql: 'mysql:5.7',
   },
 
   _config+:: {
@@ -87,4 +89,49 @@ secrets {
     cronJob.spec.jobTemplate.spec.template.metadata.withLabels({name: 'maddog'}) +
     cronJob.mixin.spec.jobTemplate.spec.template.spec.withRestartPolicy('Never') +
     cronJob.spec.jobTemplate.spec.template.spec.withServiceAccountName($.maddog_service_account.metadata.name),
+
+  dbmaintcm:
+    configMap.new('dbmaintscripts') +
+    configMap.mixin.metadata.withNamespace($._config.namespace) +
+    configMap.withData({
+      'truncate.sql': |||
+        TRUNCATE TABLE pokemon;
+        TRUNCATE TABLE trs_stats_detect_seen_type;
+        TRUNCATE TABLE trs_stats_detect_mon_raw;
+      |||,
+    }),
+
+  dbmaint_container::
+    container.new('dbmaint', $._images.mysql) +
+    container.withEnv([
+      k.core.v1.envVar.fromSecretRef('SQLPASS', $._config.madmysql.secretname, $._config.madmysql.secretpasskey),
+      k.core.v1.envVar.new('SQLHOST', 'mysql-primary.mysql.svc.cluster.local'),
+      k.core.v1.envVar.fromSecretRef('SQLUSER', $._config.madmysql.secretname, $._config.madmysql.secretuserkey),      
+      k.core.v1.envVar.new('SQLDBNAME', 'madpoc'),
+    ]) +
+    container.withVolumeMountsMixin([
+      k.core.v1.volumeMount.new('scripts', '/scripts'),
+    ]) +
+    container.withWorkingDir('/scripts') +
+    container.withCommand(['bash', '-c']) +
+    container.withArgs([|||
+      #!/usr/bin/env bash
+
+      cat << EOF > /etc/my.cnf
+      [client]
+      password=${SQLPASS}
+      EOF
+
+      mysql "-u${SQLUSER}" "-h${SQLHOST}" "${SQLDBNAME}" < /scripts/truncate.sql;
+    |||]),
+
+  # Every day at 10:05 UTC, or 3:05 PST, five minutes after quest scanning
+  dbmaint_cron:
+    cronJob.new('dbmaint', '05 10 * * *', $.dbmaint_container) +
+    cronJob.mixin.metadata.withNamespace($._config.namespace) +
+    cronJob.spec.jobTemplate.spec.template.metadata.withLabels({name: 'dbmaint'}) +
+    cronJob.mixin.spec.jobTemplate.spec.template.spec.withRestartPolicy('Never') +
+    cronJob.mixin.spec.jobTemplate.spec.template.spec.withVolumesMixin([
+      k.core.v1.volume.fromConfigMap('scripts', 'dbmaintscripts'),
+    ]),
 }
