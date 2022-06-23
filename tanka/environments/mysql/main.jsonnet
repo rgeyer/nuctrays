@@ -5,13 +5,19 @@ local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet'
 local config = import 'config.libsonnet';
 local secrets = import 'secrets.libsonnet';
 
-local pv = k.core.v1.persistentVolume,
+local container = k.core.v1.container,
+      cronJob = k.batch.v1beta1.cronJob,
+      pv = k.core.v1.persistentVolume,
       pvc = k.core.v1.persistentVolumeClaim,
       secret = k.core.v1.secret;
 
 local ns = 'mysql';
 
 config + secrets + {
+  _images+:: {
+    mysql: 'mysql:5.7',
+  },
+
   namespace: k.core.v1.namespace.new(ns),
 
   primary_pv:
@@ -88,4 +94,28 @@ config + secrets + {
       },
     },
   }),
+
+  mysqlbak_container::
+    container.new('mysqlbak', $._images.mysql) +
+    container.withEnv([
+      k.core.v1.envVar.fromSecretRef('SQLPASS', 'mysql', 'MYSQL_ROOT_PASSWORD'),
+      k.core.v1.envVar.new('SQLHOST', 'mysql-secondary.mysql.svc.cluster.local'),
+      k.core.v1.envVar.new('SQLUSER', 'root'),
+      k.core.v1.envVar.new('BACKUPROOT', '/backup'),
+    ]) +
+    container.withVolumeMountsMixin([
+      k.core.v1.volumeMount.new('scripts', '/scripts'),
+      k.core.v1.volumeMount.new('backup', '/backup'),
+    ]) +
+    container.withWorkingDir('/scripts') +
+    container.withCommand(['bash', '/scripts/mysqlreplicabak.sh']),
+
+  mysqlbak:
+    cronJob.new('mysqlhabkup', '30 1 * * *', $.mysqlbak_container) +
+    cronJob.mixin.metadata.withNamespace('default') +
+    cronJob.mixin.spec.jobTemplate.spec.template.spec.withRestartPolicy('Never') +
+    cronJob.mixin.spec.jobTemplate.spec.template.spec.withVolumesMixin([
+      k.core.v1.volume.fromConfigMap('scripts', 'backup-scripts'),
+      k.core.v1.volume.fromPersistentVolumeClaim('backup', 'backups-pvc'),
+    ]),
 }

@@ -20,7 +20,9 @@ local nfspvc = import 'k8sutils/nfspvc.libsonnet',
     configMap.withData({
       'common.sh': importstr './scripts/common.sh',
       'etcdbak.sh': importstr './scripts/etcdbak.sh',
+      // Note: Mysql backup cronjobs are defined in each mysql environment
       'mysqlbak.sh': importstr './scripts/mysqlbak.sh',
+      'mysqlreplicabak.sh': importstr './scripts/mysqlreplicabak.sh',
     }),
 
   etcd_container::
