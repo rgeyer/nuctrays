@@ -2,13 +2,15 @@ local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet'
 
 local configMap = k.core.v1.configMap,
       container = k.core.v1.container,
+      containerPort = k.core.v1.containerPort,
       statefulSet = k.apps.v1.statefulSet,
       secret = k.core.v1.secret,
+      service = k.core.v1.service,
       volume = k.core.v1.volume,
       volMnt = k.core.v1.volumeMount;
 
 {
-  new(namespace, ovpn_uname, ovpn_pass):: {
+  new(name, namespace, ovpn_uname, ovpn_pass):: {
     local this = self,
 
     common_envvars:: [{
@@ -52,6 +54,9 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('radarrconfig', '/config'),
+      ]) +
+      container.withPorts([
+        containerPort.newNamed(name='http', containerPort=7878),
       ]),
 
     sonarr_container::
@@ -59,6 +64,9 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('sonarrconfig', '/config'),
+      ]) +
+      container.withPorts([
+        containerPort.newNamed(name='http', containerPort=8989),
       ]),
 
     lidarr_container::
@@ -66,13 +74,19 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('lidarrconfig', '/config'),
-      ]),      
+      ]) +
+      container.withPorts([
+        containerPort.newNamed(name='http', containerPort=8686),
+      ]),
 
     readarr_container::
       container.new('readarr', 'hotio/readarr:nightly-0.1.0.619') +
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('readarrconfig', '/config'),
+      ]) +
+      container.withPorts([
+        containerPort.newNamed(name='http', containerPort=8787),
       ]),
 
     nzbget_container::
@@ -80,6 +94,9 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('nzbgetconfig', '/config'),
+      ]) +
+      container.withPorts([
+        containerPort.newNamed(name='http', containerPort=6789),
       ]),
 
     ovpn_config_secret:
@@ -102,8 +119,8 @@ local configMap = k.core.v1.configMap,
       }),
 
     statefulset:
-      statefulSet.new('black-pearl-too', 1, {}) +
-      statefulSet.spec.withServiceName('black-pearl') +
+      statefulSet.new(name, 1, {}) +
+      statefulSet.spec.withServiceName(name) +
       statefulSet.spec.template.spec.withContainers([
         this.vpn_container, 
         this.radarr_container,
@@ -133,6 +150,10 @@ local configMap = k.core.v1.configMap,
       ]) +
       k.util.pvcVolumeMount('plexmedia', '/media', false) +
       statefulSet.spec.template.spec.withDnsPolicy('ClusterFirst') +
-      statefulSet.spec.template.spec.dnsConfig.withNameservers(['1.1.1.1', '8.8.8.8', '8.8.4.4'],),
+      statefulSet.spec.template.spec.dnsConfig.withNameservers(['1.1.1.1', '8.8.8.8', '8.8.4.4'],),    
+
+    service:
+      k.util.serviceFor(this.statefulset) +
+      service.mixin.metadata.withNamespace(namespace)
   }
 }
