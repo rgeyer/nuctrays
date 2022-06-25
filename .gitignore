@@ -1,3 +1,4 @@
 vendor
 secrets.libsonnet
 ansible/inventory/credentials
+*.ovpn
