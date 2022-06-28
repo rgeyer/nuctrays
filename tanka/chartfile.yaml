@@ -4,7 +4,11 @@ repositories:
   url: https://charts.helm.sh/stable
 - name: bitnami
   url: https://charts.bitnami.com/bitnami
+- name: grafana
+  url: https://grafana.github.io/helm-charts
 requires:
 - chart: bitnami/mysql
   version: 8.9.2
+- chart: grafana/grafana-agent-operator
+  version: 0.2.2
 version: 1

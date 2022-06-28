@@ -73,7 +73,6 @@ https://docs.ansible.com/ansible/latest/collections/community/network/edgeos_con
 ensure that you have jb, helm and tanka installed
 
 ```
-helm repo add bitnami https://charts.bitnami.com/bitnami # Not sure this is necessary, it might not be
 jb install
 tk tool charts vendor
 ```
