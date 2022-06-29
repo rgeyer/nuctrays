@@ -334,6 +334,50 @@ local hg_secret(hg_org, namespace) = {
     },
   },
 
+  // Kube-state-metrics ServiceMonitor CR
+  ga_ksm_probe: {
+    apiVersion: 'monitoring.coreos.com/v1',
+    kind: 'ServiceMonitor',
+    metadata: {
+      labels: {
+        instance: 'primary-me',
+      },
+      name: 'ksm-monitor',
+      namespace: namespace,
+    },
+    spec: {
+      endpoints: [
+        {
+          honorLabels: true,
+          port: 'http',
+          metricRelabelings: [
+            {
+              action: 'keep',
+              regex: 'kube_daemonset_status_number_misscheduled|kubelet_node_name|kubelet_cgroup_manager_duration_seconds_bucket|kube_replicaset_owner|namespace_memory:kube_pod_container_resource_requests:sum|container_cpu_cfs_throttled_periods_total|kube_statefulset_status_replicas_updated|kube_pod_container_status_waiting_reason|kube_statefulset_status_update_revision|container_fs_reads_bytes_total|kube_pod_info|kube_pod_owner|node_namespace_pod_container:container_memory_working_set_bytes|kubelet_runtime_operations_total|kube_job_failed|kubelet_running_pod_count|kubelet_running_containers|node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate|container_network_transmit_packets_dropped_total|cluster:namespace:pod_memory:active:kube_pod_container_resource_limits|process_resident_memory_bytes|namespace_cpu:kube_pod_container_resource_requests:sum|machine_memory_bytes|kube_pod_status_phase|volume_manager_total_volumes|kube_statefulset_status_observed_generation|container_network_transmit_bytes_total|kube_horizontalpodautoscaler_spec_max_replicas|kube_node_spec_taint|kubelet_running_pods|namespace_memory:kube_pod_container_resource_limits:sum|kube_statefulset_status_replicas|kube_horizontalpodautoscaler_spec_min_replicas|kube_statefulset_metadata_generation|container_network_receive_bytes_total|go_goroutines|cluster:namespace:pod_memory:active:kube_pod_container_resource_requests|kube_daemonset_status_updated_number_scheduled|kube_node_status_allocatable|namespace_cpu:kube_pod_container_resource_limits:sum|kube_daemonset_status_current_number_scheduled|kube_deployment_spec_replicas|kubelet_certificate_manager_client_ttl_seconds|container_fs_reads_total|kube_pod_container_resource_requests|container_memory_rss|kube_deployment_metadata_generation|up|kube_resourcequota|node_namespace_pod_container:container_memory_swap|kubelet_pod_worker_duration_seconds_bucket|kubelet_node_config_error|kube_statefulset_status_current_revision|kube_horizontalpodautoscaler_status_current_replicas|container_network_transmit_packets_total|kube_node_status_capacity|container_cpu_cfs_periods_total|process_cpu_seconds_total|cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests|kube_node_info|kubelet_pleg_relist_duration_seconds_count|container_fs_writes_total|container_network_receive_packets_total|kubelet_pod_worker_duration_seconds_count|rest_client_requests_total|kubelet_volume_stats_capacity_bytes|kube_daemonset_status_desired_number_scheduled|container_memory_swap|node_namespace_pod_container:container_memory_cache|node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile|container_memory_working_set_bytes|kubelet_server_expiration_renew_errors|storage_operation_errors_total|kubelet_pleg_relist_duration_seconds_bucket|kube_deployment_status_replicas_updated|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|namespace_workload_pod|storage_operation_duration_seconds_count|kube_deployment_status_replicas_available|kube_statefulset_status_replicas_ready|kubernetes_build_info|container_cpu_usage_seconds_total|container_memory_cache|kubelet_volume_stats_inodes_used|kubelet_pleg_relist_interval_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kube_deployment_status_observed_generation|kube_daemonset_status_number_available|kube_pod_container_resource_limits|cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits|container_fs_writes_bytes_total|kube_namespace_status_phase|kubelet_volume_stats_inodes|kubelet_certificate_manager_client_expiration_renew_errors|container_network_receive_packets_dropped_total|kubelet_pod_start_duration_seconds_count|kube_horizontalpodautoscaler_status_desired_replicas|kube_statefulset_replicas|kubelet_running_container_count|node_namespace_pod_container:container_memory_rss|kubelet_certificate_manager_server_ttl_seconds|namespace_workload_pod:kube_pod_owner:relabel|kube_job_status_active|kube_job_status_start_time|kube_node_status_condition|kube_namespace_status_phase|container_cpu_usage_seconds_total|kube_pod_status_phase|kube_pod_start_time|kube_pod_container_status_restarts_total|kube_pod_container_info|kube_pod_container_status_waiting_reason|kube_daemonset.*|kube_replicaset.*|kube_statefulset.*|kube_job.*',
+              sourceLabels: [
+                '__name__',
+              ],
+            },
+            {
+              action: 'replace',
+              targetLabel: 'job',
+              replacement: 'integrations/kubernetes/kube-state-metrics',
+            },
+          ],
+        },
+      ],
+      namespaceSelector: {
+        matchNames: ['default'],
+      },
+      selector: {
+        matchLabels: {
+          'app.kubernetes.io/name': 'kube-state-metrics',
+        },
+      },
+    },
+  },
+
+
   // PodLogs CR
   ga_podlogs: {
     apiVersion: 'monitoring.grafana.com/v1alpha1',
@@ -377,7 +421,7 @@ local hg_secret(hg_org, namespace) = {
       },
       config: {
         autoscrape: {
-          enable: true, // This is redundant, right? Because the default is true
+          enable: true,  // This is redundant, right? Because the default is true
           metrics_instance: '%s/primary-me' % namespace,
         },
         rootfs_path: '/host/root',
@@ -427,10 +471,10 @@ local hg_secret(hg_org, namespace) = {
   // K8s eventhandler integration cr
   ga_k8s_events_integration:
     grao_integration.new('eventhandler', false, true) +
-    { metadata+: { labels: { agent: 'grafana-agent-metrics'},},} +
+    { metadata+: { labels: { agent: 'grafana-agent-metrics' } } } +
     grao_integration.metadata.withNamespace(namespace) +
     grao_integration.spec.withConfig({
       logs_instance: '%s/primary-logs' % namespace,
-      cache_path: '/var/lib/grafana-agent/data/eventhandler.cache', // This should live on a PV, of a statefulset agent
+      cache_path: '/var/lib/grafana-agent/data/eventhandler.cache',  // This should live on a PV, of a statefulset agent
     }),
 }
