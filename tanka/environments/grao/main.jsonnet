@@ -4,6 +4,8 @@ local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet'
 local parseYaml = std.native('parseYaml');
 local secrets = import 'secrets.libsonnet';
 
+local grao_integration = import 'grafana-agent-operator/integration.libsonnet';
+
 local clusterRole = k.rbac.v1.clusterRole,
       clusterRoleBinding = k.rbac.v1.clusterRoleBinding,
       policyRule = k.rbac.v1.policyRule,
@@ -421,4 +423,14 @@ local hg_secret(hg_org, namespace) = {
       ],
     },
   },
+
+  // K8s eventhandler integration cr
+  ga_k8s_events_integration:
+    grao_integration.new('eventhandler', false, true) +
+    { metadata+: { labels: { agent: 'grafana-agent-metrics'},},} +
+    grao_integration.metadata.withNamespace(namespace) +
+    grao_integration.spec.withConfig({
+      logs_instance: '%s/primary-logs' % namespace,
+      cache_path: '/var/lib/grafana-agent/data/eventhandler.cache', // This should live on a PV, of a statefulset agent
+    }),
 }
