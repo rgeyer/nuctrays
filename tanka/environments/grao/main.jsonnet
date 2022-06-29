@@ -348,4 +348,25 @@ local hg_secret(hg_org, namespace) = {
       },
     },
   },
+
+  // Node exporter integration cr
+  ga_nodeexporter_integration: {
+    apiVersion: 'monitoring.grafana.com/v1alpha1',
+    kind: 'Integration',
+    metadata: {
+      name: 'node-exporter-integration',
+      namespace: namespace,
+    },
+    spec: {
+      name: 'node_exporter',
+      type: {
+        allNodes: true,
+      },
+      config: {
+        rootfs_path: '/host/root',
+        sysfs_path: '/host/sys',
+        procfs_path: '/host/proc',
+      },
+    },
+  },
 }
