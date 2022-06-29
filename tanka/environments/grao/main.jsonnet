@@ -102,6 +102,7 @@ local hg_secret(hg_org, namespace) = {
       image: 'grafana/agent:v0.25.1',
       logLevel: 'info',
       serviceAccountName: $.ga_sa.metadata.name,
+      enableConfigReadAPI: true,
       metrics: {
         instanceSelector: {
           matchLabels: {
@@ -123,7 +124,7 @@ local hg_secret(hg_org, namespace) = {
         namespaceSelector: {},
         selector: {
           matchLabels: {
-            agent: 'grafana-agent-integration-singletons',
+            agent: 'grafana-agent-metrics',
           },
         },
       },
@@ -364,7 +365,7 @@ local hg_secret(hg_org, namespace) = {
     metadata: {
       name: 'node-exporter-integration',
       namespace: namespace,
-      labels: { agent: 'grafana-agent-integration-singletons' },
+      labels: { agent: 'grafana-agent-metrics' },
     },
     spec: {
       name: 'node_exporter',
@@ -374,8 +375,8 @@ local hg_secret(hg_org, namespace) = {
       },
       config: {
         autoscrape: {
-          enabled: true, // This is redundant, right? Because the default is true
-          metrics_instance: 'primary-me',
+          enable: true, // This is redundant, right? Because the default is true
+          metrics_instance: '%s/primary-me' % namespace,
         },
         rootfs_path: '/host/root',
         sysfs_path: '/host/sys',
