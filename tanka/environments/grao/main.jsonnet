@@ -119,6 +119,14 @@ local hg_secret(hg_org, namespace) = {
           },
         },
       },
+      integrations: {
+        namespaceSelector: {},
+        selector: {
+          matchLabels: {
+            agent: 'grafana-agent-integration-singletons',
+          },
+        },
+      },
     },
   },
 
@@ -356,17 +364,60 @@ local hg_secret(hg_org, namespace) = {
     metadata: {
       name: 'node-exporter-integration',
       namespace: namespace,
+      labels: { agent: 'grafana-agent-integration-singletons' },
     },
     spec: {
       name: 'node_exporter',
       type: {
         allNodes: true,
+        unique: true,
       },
       config: {
+        autoscrape: {
+          enabled: true, // This is redundant, right? Because the default is true
+          metrics_instance: 'primary-me',
+        },
         rootfs_path: '/host/root',
         sysfs_path: '/host/sys',
         procfs_path: '/host/proc',
       },
+      volumes: [
+        {
+          name: 'rootfs',
+          hostPath: {
+            path: '/',
+            type: '',
+          },
+        },
+        {
+          name: 'sysfs',
+          hostPath: {
+            path: '/sys',
+            type: '',
+          },
+        },
+        {
+          name: 'procfs',
+          hostPath: {
+            path: '/proc',
+            type: '',
+          },
+        },
+      ],
+      volumeMounts: [
+        {
+          name: 'rootfs',
+          mountPath: '/host/root',
+        },
+        {
+          name: 'sysfs',
+          mountPath: '/host/sys',
+        },
+        {
+          name: 'procfs',
+          mountPath: '/host/proc',
+        },
+      ],
     },
   },
 }
