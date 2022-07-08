@@ -5,11 +5,12 @@ all:
       ip: 192.168.42.116
       access_ip: 192.168.42.116
       ethernet_device_name: eno1
-    18tc1:
-      ansible_host: 192.168.42.115
-      ip: 192.168.42.115
-      access_ip: 192.168.42.115
-      ethernet_device_name: eno1
+    # Removed from this cluster, to start a new one.
+    # 18tc1:
+    #   ansible_host: 192.168.42.115
+    #   ip: 192.168.42.115
+    #   access_ip: 192.168.42.115
+    #   ethernet_device_name: eno1
     18n1l:
       ansible_host: 192.168.42.100
       ip: 192.168.42.100
