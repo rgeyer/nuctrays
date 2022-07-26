@@ -31,6 +31,15 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/jsonnet-libs/grafana-agent-libsonnet.git",
+          "subdir": "0.26"
+        }
+      },
+      "version": "main"
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
           "subdir": "1.19"
         }
