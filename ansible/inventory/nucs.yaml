@@ -62,7 +62,7 @@ all:
     kube_node:
       hosts:
         18mad1:
-        18tc1:
+        # 18tc1:
         18n1l:
         18n1r:
         18n2l:
