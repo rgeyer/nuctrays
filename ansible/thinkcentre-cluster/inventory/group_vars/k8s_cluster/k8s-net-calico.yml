@@ -7,7 +7,12 @@ calico_cni_name: k8s-pod-network
 ## With calico it is possible to distributed routes with border routers of the datacenter.
 ## Warning : enabling router peering will disable calico's default behavior ('node mesh').
 ## The subnets of each nodes will be distributed by the datacenter router
-# peer_with_router: false
+peer_with_router: true
+peers:
+- name: gateway
+  as: "1"
+  router_id: 192.168.1.1
+  scope: global
 
 # Enables Internet connectivity from containers
 # nat_outgoing: true
@@ -34,7 +39,7 @@ calico_pool_blocksize: 26
 # calico_cni_pool_ipv6: true
 
 # Global as_num (/calico/bgp/v1/global/as_num)
-# global_as_num: "64512"
+global_as_num: "64513"
 
 # If doing peering with node-assigned asn where the globas does not match your nodes, you want this
 # to be true.  All other cases, false.
@@ -86,7 +91,7 @@ calico_pool_blocksize: 26
 
 # Set calico network backend: "bird", "vxlan" or "none"
 # bird enable BGP routing, required for ipip and no encapsulation modes
-# calico_network_backend: vxlan
+calico_network_backend: bird
 
 # IP in IP and VXLAN is mutualy exclusive modes.
 # set IP in IP encapsulation mode: "Always", "CrossSubnet", "Never"
