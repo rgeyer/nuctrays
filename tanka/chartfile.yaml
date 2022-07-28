@@ -6,9 +6,17 @@ repositories:
   url: https://charts.bitnami.com/bitnami
 - name: grafana
   url: https://grafana.github.io/helm-charts
+- name: traefik
+  url: https://github.com/traefik
+- name: traefik
+  url: https://helm.traefik.io/traefik
+- name: traefik
+  url: https://helm.traefik.io
 requires:
 - chart: bitnami/mysql
   version: 8.9.2
 - chart: grafana/grafana-agent-operator
   version: 0.2.2
+- chart: traefik/traefik
+  version: 10.24.0
 version: 1
