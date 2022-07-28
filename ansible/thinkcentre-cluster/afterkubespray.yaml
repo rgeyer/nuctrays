@@ -1,0 +1,16 @@
+---
+- hosts: kube_node
+  become: true
+
+  tasks:
+    - name: Create CIFS volume plugin directory
+      ansible.builtin.file:
+        path: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/fstab~cifs
+        state: directory
+        mode: '0755'
+
+    - name: Download CIFS plugin
+      get_url:
+        url: https://raw.githubusercontent.com/fstab/cifs/master/cifs
+        dest: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/fstab~cifs/cifs
+        mode: '0755'
