@@ -70,7 +70,7 @@ credentials_dir: "{{ inventory_dir }}/credentials"
 kube_network_plugin: calico
 
 # Setting multi_networking to true will install Multus: https://github.com/intel/multus-cni
-kube_network_plugin_multus: true
+kube_network_plugin_multus: false
 
 # Kubernetes internal network for services, unused block of space.
 kube_service_addresses: 10.234.0.0/18
