@@ -15,7 +15,7 @@ local pv = k.core.v1.persistentVolume,
       pv.spec.withStorageClassName(storageClass) +
       pv.spec.withMountOptions([
         'hard',
-        'nfsvers=4.1',
+        'nfsvers=4.0',
       ]) +
       pv.spec.nfs.withPath(nfsPath) +
       pv.spec.nfs.withServer(nfsHost),
