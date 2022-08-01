@@ -14,3 +14,10 @@
         url: https://raw.githubusercontent.com/fstab/cifs/master/cifs
         dest: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/fstab~cifs/cifs
         mode: '0755'
+
+    - name: Install Packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+      - nfs-common
