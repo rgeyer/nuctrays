@@ -15,11 +15,10 @@ local helm = tanka.helm.new(std.thisFile);
 
 local parseYaml = std.native('parseYaml');
 
-local nfspvc = import 'k8sutils/nfspvc.libsonnet';
 local config = import 'config.libsonnet';
 local secrets = import 'secrets.libsonnet';
 
-local traefikingress = import 'traefik/ingress.libsonnet',
+local traefik = import 'traefik/main.libsonnet',
       traefikmiddlewares = import 'traefik/mymiddlewares.libsonnet';
 
 config + secrets {
@@ -78,89 +77,26 @@ config + secrets {
   // TODO: This, plus the default ingress routes use the namespace `traefik` for the middleware config location. I think it should probably be in either default, or ktraefik
   traefikredirect: traefikmiddlewares.redirect,
 
-  traefikrac:: [
-    policyRule.withApiGroups(['']) +
-    policyRule.withResources(['services', 'endpoints', 'secrets']) +
-    policyRule.withVerbs(['get', 'list', 'watch']),
-
-    policyRule.withApiGroups(['extensions', 'networking.k8s.io']) +
-    policyRule.withResources(['ingresses', 'ingressclasses']) +
-    policyRule.withVerbs(['get', 'list', 'watch']),
-
-    policyRule.withApiGroups(['extensions']) +
-    policyRule.withResources(['ingresses/status']) +
-    policyRule.withVerbs(['update']),
-
-    policyRule.withApiGroups(['traefik.containo.us']) +
-    policyRule.withResources([
-      'middlewares',
-      'middlewaretcps',
-      'ingressroutes',
-      'traefikservices',
-      'ingressroutetcps',
-      'ingressrouteudps',
-      'tlsoptions',
-      'tlsstores',
-      'serverstransports',
-    ]) +
-    policyRule.withVerbs(['get', 'list', 'watch']),
-  ],
-
-  ktraefikrbac: k { _config+:: { namespace: 'ktraefik' } }.util.rbac('ktraefik', $.traefikrac) {
-    service_account+: serviceAccount.mixin.metadata.withNamespace('ktraefik'),
-  },
-
-  ktraefik_pvc: nfspvc.new(
+  ktraefik: traefik.new(
     'ktraefik',
+    'ktraefik',
+    $._images.traefik,
+    'ktraefik.ryangeyer.com',
+    '10.43.0.16',
     $._config.traefik.private.pvc.nfsHost,
     $._config.traefik.private.pvc.nfsPath,
-    'ktraefik',
+    'certbot-route53'
   ),
 
-  ktraefik_container::
-    container.new('ktraefik', $._images.traefik) +
-    container.withEnvFrom(envFrom.secretRef.withName('certbot-route53')) +
-    container.withPorts([
-      containerPort.new('web', 80),
-      containerPort.new('websecure', 443),
-      containerPort.new('metrics', 8080),
-    ]) +
-    container.withArgsMixin([
-      '--api.dashboard=true',
-      '--entrypoints.web.Address=:80',
-      '--entrypoints.websecure.Address=:443',
-      '--providers.kubernetescrd',
-      '--providers.kubernetescrd.allowCrossNamespace=true',
-      '--certificatesresolvers.mydnschallenge.acme.dnschallenge=true',
-      '--certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=route53',
-      '--certificatesresolvers.mydnschallenge.acme.email=qwikrex@gmail.com',
-      '--certificatesresolvers.mydnschallenge.acme.storage=/etc/traefik/acme/acme.json',
-      '--metrics.prometheus=true',
-      '--metrics.prometheus.addEntryPointsLabels=true',
-      '--metrics.prometheus.addServicesLabels=true',
-      // These are implicit, but adding them for the sake of clarity
-      '--entrypoints.traefik.Address=:8080',
-      '--metrics.prometheus.entryPoint=traefik',
-    ]) +
-    container.withVolumeMountsMixin([
-      volumeMount.new('ktraefik', '/etc/traefik/acme'),
-    ]),
-
-  ktraefik_statefulset:
-    statefulSet.new('traefik', 1, $.ktraefik_container) +
-    statefulSet.spec.withServiceName('traefik') +
-    statefulSet.mixin.metadata.withNamespace('ktraefik') +
-    statefulSet.spec.template.metadata.withAnnotations({
-      'cni.projectcalico.org/ipAddrs': '["%(ip)s"]' % { ip: '10.43.0.16' },
-    }) +
-    statefulSet.mixin.spec.template.spec.withVolumesMixin([
-      volume.fromPersistentVolumeClaim('ktraefik', 'ktraefik-pvc'),
-    ]) +
-    statefulSet.spec.template.spec.withServiceAccountName('ktraefik'),
-
-  ktraefik_svc:
-    k.util.serviceFor($.ktraefik_statefulset) +
-    service.mixin.metadata.withNamespace('ktraefik'),
-
-  ktraefikingress: traefikingress.newTraefikServiceIngressRoute('ktraefik', 'ktraefik', 'ktraefik.ryangeyer.com', 'api@internal'),
+  ptraefik: traefik.new(
+    'ptraefik',
+    'ptraefik',
+    $._images.traefik,
+    'ptraefik.ryangeyer.com',
+    '10.43.0.17',
+    $._config.traefik.public.pvc.nfsHost,
+    $._config.traefik.public.pvc.nfsPath,
+    'certbot-route53',
+    'traefikzone=public',
+  ),
 }
