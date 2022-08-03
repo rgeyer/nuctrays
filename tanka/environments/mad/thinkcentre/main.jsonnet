@@ -18,6 +18,7 @@ local nominatim = import 'nominatim/main.libsonnet';
 local poracle = import 'poracle/main.libsonnet';
 local rocketmad = import 'rocketmad/main.libsonnet';
 local madbe = import 'madbe/main.libsonnet';
+local madsql = import 'mysql/hahostpath.libsonnet';
 
 config + secrets {
   _images+:: {
@@ -35,9 +36,10 @@ config + secrets {
   },
 
   _config+:: {
+    local this = self,
     namespace: 'mad',
     namefetcher+:: {
-      dbhost: 'mysql-primary.sharedsvc.svc.cluster.local',
+      dbhost: 'mysql-mad-primary.mad.svc.cluster.local',
       dbname: 'madpoc',
     },
 
@@ -49,8 +51,17 @@ config + secrets {
     },
 
     rocketmap+:: {
-      dbhost: 'mysql-primary.sharedsvc.svc.cluster.local',
+      dbhost: 'mysql-mad-primary.mad.svc.cluster.local',
       dbname: 'madpoc',
+    },
+
+    hahostpath+:: {
+      suffix: '-mad',
+      root_password: this.mysql.root_password,
+      replication_password: this.mysql.replication_password,
+      password: this.mysql.password,
+      primaryHost: 'mad-hx90',
+      replicaHost: 'thinkcentre1',
     },
   },
 
@@ -66,6 +77,7 @@ config + secrets {
   poracle: poracle + config_mixin,
   rocketmad: rocketmad + config_mixin,
   madbe: madbe + config_mixin,
+  madsql: madsql + config_mixin,
 
   maddb_secret:
     secret.new('mysql-secret', {}) +
@@ -157,7 +169,7 @@ config + secrets {
     container.new('dbmaint', $._images.mysql) +
     container.withEnv([
       k.core.v1.envVar.fromSecretRef('SQLPASS', $._config.madmysql.secretname, $._config.madmysql.secretpasskey),
-      k.core.v1.envVar.new('SQLHOST', 'mysql-primary.sharedsvc.svc.cluster.local'),
+      k.core.v1.envVar.new('SQLHOST', 'mysql-mad-primary.mad.svc.cluster.local'),
       k.core.v1.envVar.fromSecretRef('SQLUSER', $._config.madmysql.secretname, $._config.madmysql.secretuserkey),
       k.core.v1.envVar.new('SQLDBNAME', 'madpoc'),
     ]) +

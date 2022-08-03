@@ -52,7 +52,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
         # Game Stats
         ######################
         game_stats
-        # game_stats_raw
+        game_stats_raw
 
         # webhook
         ######################
@@ -117,7 +117,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
     container.withEnv([
       k.core.v1.envVar.new('TZ', 'America/Los_Angeles'),
       k.core.v1.envVar.fromSecretRef('SQLPASS', $._config.madmysql.secretname, $._config.madmysql.secretpasskey),
-      k.core.v1.envVar.new('SQLHOST', 'mysql-primary.sharedsvc.svc.cluster.local'),
+      k.core.v1.envVar.new('SQLHOST', 'mysql-mad-primary.mad.svc.cluster.local'),
       k.core.v1.envVar.fromSecretRef('SQLUSER', $._config.madmysql.secretname, $._config.madmysql.secretuserkey),
       k.core.v1.envVar.new('SQLDBNAME', 'madpoc'),
       k.core.v1.envVar.fromSecretRef('MADDEVAPITOKEN', 'madmin-secret', 'maddev-api-token'),
@@ -140,7 +140,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
       k.core.v1.volumeMount.new('plugins', '/usr/src/app/plugins'),
     ]) +
     container.resources.withRequests({memory: "8G"}) +
-    container.resources.withLimits({memory: "10G"}),
+    container.resources.withLimits({memory: "16G"}),
 
   initContainer::
     container.new('madbeinit', $._images.busybox) +
@@ -168,7 +168,9 @@ local traefikingress = import 'traefik/ingress.libsonnet';
       k.core.v1.volume.fromPersistentVolumeClaim('personal-commands', 'madbe-personal-commands-pvc'),
       k.core.v1.volume.fromPersistentVolumeClaim('apks', 'madbe-apks-pvc'),
       k.core.v1.volume.fromPersistentVolumeClaim('plugins', 'madbe-plugins-pvc'),
-    ]),
+    ]) +
+    // Pin it to the HX90
+    deployment.spec.template.spec.withNodeName('mad-hx90'),
 
   service:
     k.util.serviceFor($.deployment) +
