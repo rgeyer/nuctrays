@@ -99,5 +99,19 @@
         'bignasty-public': '30 5 * * *', # 10:30p Pacific/5:30a UTC Daily
       },
     },
+
+    postgis+:: {
+      pvc: {
+        nfsHost: '192.168.42.10',
+        nfsPath: '/kubestore/postgres/data'
+      },
+    },
+
+    rocketmad+:: {
+      pvc: {
+        nfsHost: '192.168.42.10',
+        nfsPath: '/kubestore/rocketmad'
+      },
+    },
   }
 }

@@ -20,4 +20,10 @@
         name: "{{ item }}"
         state: present
       loop:
-      - nfs-common
+      - nfs-common  
+
+    - name: Add local image registry hostname to /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^10.43.0.16 registry.ryangeyer.com registry'
+        line: 10.43.0.16 registry.ryangeyer.com registry

@@ -52,6 +52,8 @@ config + secrets + {
     }) +
     secret.mixin.metadata.withNamespace(ns),
 
+  mysql_bkup_secret: $.mysql_secret + secret.mixin.metadata.withNamespace('default'),
+
   mysql: helm.template('mysql', '../../../charts/mysql', {
     namespace: ns,
     values: {

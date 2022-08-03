@@ -17,19 +17,31 @@ local parseYaml = std.native('parseYaml');
 
 local config = import 'config.libsonnet';
 local secrets = import 'secrets.libsonnet';
+local nfspvc = import 'k8sutils/nfspvc.libsonnet';
 
 local traefik = import 'traefik/main.libsonnet',
+      traefikingress = import 'traefik/ingress.libsonnet',
       traefikmiddlewares = import 'traefik/mymiddlewares.libsonnet';
 
 config + secrets {
   _images+:: {
     traefik: 'traefik:2.8',
+    registry: 'registry:2',
+  },
+
+  _config+:: {
+    registry:: {
+      pvc: {
+        nfsHost: '192.168.42.10',
+        nfsPath: '/kubestore/registry',
+      },
+    },
   },
 
   // Bootstrap Namespaces
   namespaces: {
     [ns]: k.core.v1.namespace.new(ns)
-    for ns in ['sharedsvc', 'ktraefik', 'ptraefik', 'traefik']
+    for ns in ['sharedsvc', 'ktraefik', 'ptraefik', 'traefik', 'mad']
   },
 
   // Calico static ip pool
@@ -99,4 +111,31 @@ config + secrets {
     'certbot-route53',
     'traefikzone=public',
   ),
+
+  registrypvc:
+    nfspvc.new('default', $._config.registry.pvc.nfsHost, $._config.registry.pvc.nfsPath, 'registry'),
+
+  registryContainer::
+    container.new('registry', $._images.registry) +
+    container.withPorts([
+      containerPort.new('registry', 5000),
+    ]) +
+    container.withVolumeMountsMixin([
+      volumeMount.new('registry', '/var/lib/registry'),
+    ]),
+  
+  registryStatefulSet:
+    statefulSet.new('registry', 1, $.registryContainer) +
+    statefulSet.spec.withServiceName('registry') +
+    statefulSet.mixin.spec.template.spec.withVolumesMixin([
+      volume.fromPersistentVolumeClaim('registry', 'registry-pvc'),
+    ]) +
+    statefulSet.mixin.metadata.withNamespace('default'),
+
+  registryService:
+    k.util.serviceFor($.registryStatefulSet) +
+    service.mixin.metadata.withNamespace('default'),
+
+  registryIngress:
+    traefikingress.newIngressRoute('registry', 'default', 'registry.ryangeyer.com', 'registry', 5000),
 }

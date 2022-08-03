@@ -1,0 +1,149 @@
+[
+  {
+    "id": 1,
+    "language": "en",
+    "type": "monster",
+    "default": true,
+    "platform": "discord",
+    "template": {
+      "embed": {
+        "color": "{{ivColor}}",
+        "title": "{{round iv}}% {{name}}{{#if form}}{{#isnt formName 'Normal'}} {{formName}}{{/isnt}}{{/if}} cp:{{cp}} L:{{level}} {{atk}}/{{def}}/{{sta}} {{boostWeatherEmoji}}",
+        "description": "End: {{time}}, Time left: {{tthm}}m {{tths}}s \n {{#if weatherChange}}{{weatherChange}}\n{{/if}}{{{addr}}} \n quick: {{quickMoveName}}, charge: {{chargeMoveName}} \n {{#if pvp_rankings_great_league}}{{#compare bestGreatLeagueRank '<=' pvpDisplayMaxRank}}{{#compare bestGreatLeagueRankCP '>=' pvpDisplayGreatMinCP}}**Great league:**\n{{/compare}}{{/compare}}{{#each pvp_rankings_great_league}}{{#if this.rank}}{{#compare this.rank '<=' ../pvpDisplayMaxRank}}{{#compare this.cp '>=' ../pvpDisplayGreatMinCP}} - {{pokemonName this.pokemon}} #{{this.rank}} @{{this.cp}}CP (Lvl. {{this.level}})\n{{/compare}}{{/compare}}{{/if}}{{/each}}{{/if}}{{#if pvp_rankings_ultra_league}}{{#compare bestUltraLeagueRank '<=' pvpDisplayMaxRank}}{{#compare bestUltraLeagueRankCP '>=' pvpDisplayUltraMinCP}}**Ultra League:**\n{{/compare}}{{/compare}}{{#each pvp_rankings_ultra_league}}{{#if this.rank}}{{#compare this.rank '<=' ../pvpDisplayMaxRank}}{{#compare this.cp '>=' ../pvpDisplayUltraMinCP}} - {{pokemonName this.pokemon}} #{{this.rank}} @{{this.cp}}CP (Lvl. {{this.level}})\n{{/compare}}{{/compare}}{{/if}}{{/each}}{{/if}} Maps: [Google]({{{googleMapUrl}}}) | [Apple]({{{appleMapUrl}}})",
+        "thumbnail": {
+          "url": "{{{imgUrl}}}"
+        }
+      }
+    }
+  },
+  {
+    "id": 1,
+    "type": "monsterNoIv",
+    "default": true,
+    "platform": "discord",
+    "template": {
+      "embed": {
+        "color": "{{color}}",
+        "thumbnail": {
+          "url": "{{{imgUrl}}}"
+        },
+        "description": "#{{id}} {{name}} end: {{time}}, \ntime left: {{tthm}}m {{tths}}s {{flagemoji}} {{lat}}, {{lon}} {{addr}} \n{{{emojistring}}}  [Google Maps]({{{mapurl}}}) [Apple Maps]({{{applemap}}})"
+      }
+    },
+    "language": "en"
+  },
+  {
+    "id": 1,
+    "type": "raid",
+    "default": true,
+    "platform": "discord",
+    "template": {
+      "embed": {
+        "title": "Raid against {{name}} has started at {{gymName}}! {{#ex}}EX Eligible!{{/ex}}",
+        "description": "QM: {{move1emoji}} {{quick_move}}, CM: {{move2emoji}} {{charge_move}} \n{{{emojistring}}}  [Google Maps]({{{mapurl}}}) [Apple Maps]({{{applemap}}})",
+        "color": "{{color}}",
+        "thumbnail": {
+          "url": "{{{imgUrl}}}"
+        },
+        "author": {
+          "name": "{{name}} lvl{{level}}, {{tthm}}m {{tths}}s left",
+          "icon_url": "{{{detailsurl}}}"
+        }
+      }
+    },
+    "language": "en"
+  },
+  {
+    "id": 1,
+    "type": "egg",
+    "default": true,
+    "platform": "discord",
+    "template": {
+      "embed": {
+        "title": "Level{{level}} egg has appeared at {{gymName}}",
+        "description": " {{{emojistring}}}  [Google Maps]({{{mapurl}}}) [Apple Maps]({{{applemap}}})",
+        "color": "{{color}}",
+        "thumbnail": {
+          "url": "{{{detailsurl}}}"
+        },
+        "author": {
+          "name": "{{name}} lvl{{level}} hatches: {{time}}, {{tthm}}m {{tths}}s",
+          "icon_url": "{{{imgUrl}}}"
+        }
+      }
+    },
+    "language": "en"
+  },
+  {
+    "id": 1,
+    "type": "quest",
+    "default": true,
+    "platform": "discord",
+    "template": {
+      "embed": {
+        "title": "{{questType}}, {{flagemoji}} {{lat}}, {{lon}} {{addr}} \n Pokestop Name: {{pokestop_name}}",
+        "url": "{{{mapurl}}}",
+        "description": "Conditions: {{conditionString}} \nReward:  {{rewardData.rewardString}} {{monsterNames}} \n[Google Maps]({{{mapurl}}}) | [Apple Maps]({{{applemap}}})",
+        "thumbnail": {
+          "url": "{{{imgUrl}}}"
+        }
+      }
+    },
+    "language": "en"
+  },
+  {
+    "id": 1,
+    "type": "invasion",
+    "default": true,
+    "platform": "discord",
+    "template": {
+      "embed": {
+        "title": "Team Rocket incident has started! at {{name}}",
+        "description": "[Google Maps]({{{mapurl}}}) [Apple Maps]({{{applemap}}})",
+        "thumbnail": {
+          "url": "{{{imgUrl}}}"
+        }
+      }
+    },
+    "language": "en"
+  },
+  {
+    "id": 1,
+    "type": "greeting",
+    "default": true,
+    "platform": "discord",
+    "template": {
+      "embed": {
+        "title": "Welcome",
+        "description": "Thank you for registering \nPlease set a location `{{prefix}}location name of place` or add ares where to receive alarms from",
+        "fields": [
+          {
+            "name": "General commands",
+            "value": "`{{prefix}}poracle`: Adds you to database and enables tracking \n`{{prefix}}unregister`: Removes you from tracking \n`{{prefix}}stop`: Temporarily stops alarms \n`{{prefix}}start`: Re-enables alarms \n`{{prefix}}location yourArea`: Searches for yourArea and sets it as your location \n`{{prefix}}area add somePlace`: Sets one or multiple areas where to receive alarms from, areas need to be configured by admin \n`{{prefix}}area remove somePlace`: Removes a configured area"
+          },
+          {
+            "name": "Monster tracking commands",
+            "value": "`{{prefix}}track snorlax lapras d500 iv50 maxiv90 cp1000 level15`: Any arguments are optional, this command would alert you about snorlax and lapras within 500 meters of your location or inside an added area. The set filters require them to have IV between 50% - 90% be at least level 15 and minimum CP of 1000 \n`{{prefix}}untrack lapras vileplume`: will remove tracking for lapras and vileplume"
+          },
+          {
+            "name": "Raid tracking commands",
+            "value": "`{{prefix}}raid snorlax lapras d500 instinct`: Any arguments are optional, this command would alert you about snorlax and lapras raids within 500 meters of your location or inside an added area. The set filters require the Gym to be controlled by team Instinct \n`{{prefix}}raid remove lapras vileplume`: will remove tracking for lapras and vileplume raids"
+          },
+          {
+            "name": "Raid egg tracking commands",
+            "value": "`{{prefix}}egg level3 d500 instinct`: Any arguments are optional, this command would alert you about level 3 raid eggs within 500 meters of your location or inside an added area. The set filters require the Gym to be controlled by team Instinct \n`{{prefix}}egg remove level3`: will remove tracking for level 3 raid eggs"
+          },
+          {
+            "name": "Quest tracking commands",
+            "value": "`{{prefix}}quest porygon pikachu poke ball d500 `: Any arguments are optional, this command would alert you about Quests obtainable within 500m of your location with porygon, pikachu or pokeballs as rewards \n `{{prefix}}quest remove all items` Removes tracking for all item based quests. Can also use `all pokemon` or `stardust`"
+          },
+          {
+            "name": "Invasion tracking commands",
+            "value": "`{{prefix}}invasion template3 d500 dragon mixed`: Any arguments are optional, this command would alert you about Team Rocket Incidents within 500m of your location if the grunt type was mixed or dragon. You can use any pokemon type name.\n `{{prefix}}invasion remove` Removes tracking for all Team Rocket Incidents."
+          }
+        ]
+      }
+    },
+    "language": "en"
+  }
+]
