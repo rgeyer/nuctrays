@@ -8,6 +8,10 @@ all:
       ansible_host: 192.168.42.201
       ip: 192.168.42.201
       access_ip: 192.168.42.201
+    mad-hx90:
+      ansible_host: 192.168.42.202
+      ip: 192.168.42.202
+      access_ip: 192.168.42.202
   children:
     kube_control_plane:
       hosts:
@@ -17,6 +21,7 @@ all:
       hosts:
         thinkcentre1:
         thinkcentre2:
+        mad-hx90:
     etcd:
       hosts:
         thinkcentre1:
