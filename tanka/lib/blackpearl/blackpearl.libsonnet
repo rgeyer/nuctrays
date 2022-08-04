@@ -10,13 +10,43 @@ local configMap = k.core.v1.configMap,
       volMnt = k.core.v1.volumeMount;
 
 {
-  new(name, namespace, ovpn_uname, ovpn_pass):: {
+  withNamespace(namespace):: {
+    ovpn_config_secret+: secret.mixin.metadata.withNamespace(namespace),
+    ovpn_auth_secret+: secret.mixin.metadata.withNamespace(namespace),
+    route_script_cm+: configMap.mixin.metadata.withNamespace(namespace),    
+    statefulset+: statefulSet.mixin.metadata.withNamespace(namespace),
+    service+: service.mixin.metadata.withNamespace(namespace),
+  },
+
+  withPvc(name, pvc):: {
+    pvcs+:: {
+      [name]: pvc
+    },
+  },
+
+  withPvcs(pvcs):: {
+    pvcs+:: pvcs,
+  },
+
+  new(name, ovpn_uname, ovpn_pass):: {
     local this = self,
 
     common_envvars:: [{
       name: 'TZ',
       value: 'America/Los_Angeles',
     }],
+
+    pvcs:: {
+      [pvc]: error 'no %s pvc provided' % pvc
+      for pvc in [
+        'radarrconfig',
+        'sonarrconfig',
+        'lidarrconfig',
+        'readarrconfig',
+        'nzbgetconfig',
+        'media',
+      ]
+    },
 
     init_container::
       container.new('vpn-route-init', 'busybox') +
@@ -54,6 +84,7 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('radarrconfig', '/config'),
+        volMnt.new('media', '/media'),
       ]) +
       container.withPorts([
         containerPort.newNamed(name='http', containerPort=7878),
@@ -64,6 +95,7 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('sonarrconfig', '/config'),
+        volMnt.new('media', '/media'),
       ]) +
       container.withPorts([
         containerPort.newNamed(name='http', containerPort=8989),
@@ -74,6 +106,7 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('lidarrconfig', '/config'),
+        volMnt.new('media', '/media'),
       ]) +
       container.withPorts([
         containerPort.newNamed(name='http', containerPort=8686),
@@ -84,6 +117,7 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('readarrconfig', '/config'),
+        volMnt.new('media', '/media'),
       ]) +
       container.withPorts([
         containerPort.newNamed(name='http', containerPort=8787),
@@ -94,6 +128,7 @@ local configMap = k.core.v1.configMap,
       container.withEnv(this.common_envvars) +
       container.withVolumeMountsMixin([
         volMnt.new('nzbgetconfig', '/config'),
+        volMnt.new('media', '/media'),
       ]) +
       container.withPorts([
         containerPort.newNamed(name='http', containerPort=6789),
@@ -113,7 +148,6 @@ local configMap = k.core.v1.configMap,
 
     route_script_cm:
       configMap.new('route-script') +
-      configMap.mixin.metadata.withNamespace(namespace) +
       configMap.withData({
         'route-override.sh': importstr './route-override.sh',
       }),
@@ -128,7 +162,6 @@ local configMap = k.core.v1.configMap,
         this.lidarr_container,
         this.readarr_container,
         this.nzbget_container,]) +
-      statefulSet.mixin.metadata.withNamespace(namespace) +
       statefulSet.spec.template.spec.withInitContainers(this.init_container) +
       statefulSet.spec.template.spec.withVolumes([
         volume.fromConfigMap('route-script','route-script',
@@ -141,19 +174,18 @@ local configMap = k.core.v1.configMap,
           volume.secret.withItems([{key: 'auth.txt', path: 'auth.txt'}]) +
           volume.secret.withDefaultMode(420),
         volume.fromEmptyDir('tmp'),
-        volume.fromPersistentVolumeClaim('radarrconfig', 'radarrconfig'),
-        volume.fromPersistentVolumeClaim('sonarrconfig', 'sonarrconfig'),
-        volume.fromPersistentVolumeClaim('lidarrconfig', 'lidarrconfig'),
-        volume.fromPersistentVolumeClaim('readarrconfig', 'readarrconfig'),
-        volume.fromPersistentVolumeClaim('nzbgetconfig', 'nzbgetconfig'),
-        volume.fromPersistentVolumeClaim('plexmedia', 'plexmedia'),
+        volume.fromPersistentVolumeClaim('radarrconfig', this.pvcs['radarrconfig']),
+        volume.fromPersistentVolumeClaim('sonarrconfig', this.pvcs['sonarrconfig']),
+        volume.fromPersistentVolumeClaim('lidarrconfig', this.pvcs['lidarrconfig']),
+        volume.fromPersistentVolumeClaim('readarrconfig', this.pvcs['readarrconfig']),
+        volume.fromPersistentVolumeClaim('nzbgetconfig', this.pvcs['nzbgetconfig']),
+        volume.fromPersistentVolumeClaim('media', this.pvcs['media']),
       ]) +
-      k.util.pvcVolumeMount('plexmedia', '/media', false) +
+      // k.util.pvcVolumeMount(this.pvcs['media'], '/media', false) +
       statefulSet.spec.template.spec.withDnsPolicy('ClusterFirst') +
       statefulSet.spec.template.spec.dnsConfig.withNameservers(['1.1.1.1', '8.8.8.8', '8.8.4.4'],),    
 
     service:
-      k.util.serviceFor(this.statefulset) +
-      service.mixin.metadata.withNamespace(namespace)
+      k.util.serviceFor(this.statefulset),
   }
 }
