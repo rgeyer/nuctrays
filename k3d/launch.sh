@@ -1,0 +1,1 @@
+k3d cluster create homelab --config config.json

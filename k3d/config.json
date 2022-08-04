@@ -1,0 +1,22 @@
+{
+  "apiVersion": "k3d.io/v1alpha3",
+  "kind": "Simple",
+  "kubeAPI": {
+    "hostPort": "8043"
+  },
+  "ports": [
+    {
+      "port": "8042:80",
+      "nodeFilters": ["loadbalancer"]
+    }
+  ],
+  "options": {
+    "k3d": {
+      "wait": true
+    },
+    "kubeconfig": {
+      "updateDefaultKubeconfig": true,
+      "switchCurrentContext": true
+    }
+  }
+}
