@@ -91,8 +91,9 @@ local container = k.core.v1.container,
   mysqlbak_container::
     container.new('mysqlbak', $._images.mysql) +
     container.withEnv([
-      k.core.v1.envVar.fromSecretRef('SQLPASS', 'mysql', 'MYSQL_ROOT_PASSWORD'),
-      k.core.v1.envVar.new('SQLHOST', 'mysql-secondary%s.%s.svc.cluster.local' % [$._config.hahostpath.suffix, $._config.namespace]),
+      k.core.v1.envVar.new('SQLINSTANCENAME', std.stripChars($._config.hahostpath.suffix, '-')),
+      k.core.v1.envVar.fromSecretRef('SQLPASS', 'mysql', 'mysql-root-password'),
+      k.core.v1.envVar.new('SQLHOST', 'mysql%s-secondary.%s.svc.cluster.local' % [$._config.hahostpath.suffix, $._config.namespace]),
       k.core.v1.envVar.new('SQLUSER', 'root'),
       k.core.v1.envVar.new('BACKUPROOT', '/backup'),
     ]) +

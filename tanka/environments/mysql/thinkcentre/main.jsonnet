@@ -99,7 +99,8 @@ config + secrets + {
   mysqlbak_container::
     container.new('mysqlbak', $._images.mysql) +
     container.withEnv([
-      k.core.v1.envVar.fromSecretRef('SQLPASS', 'mysql', 'MYSQL_ROOT_PASSWORD'),
+      k.core.v1.envVar.new('SQLINSTANCENAME', 'sharedsvc'),
+      k.core.v1.envVar.fromSecretRef('SQLPASS', 'mysql', 'mysql-root-password'),
       k.core.v1.envVar.new('SQLHOST', 'mysql-secondary.sharedsvc.svc.cluster.local'),
       k.core.v1.envVar.new('SQLUSER', 'root'),
       k.core.v1.envVar.new('BACKUPROOT', '/backup'),

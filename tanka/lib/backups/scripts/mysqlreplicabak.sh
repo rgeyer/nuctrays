@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source ./common.sh
-mysql_repl_path=$backup_path/mysqlha
+mysql_repl_path=$backup_path/mysqlha/$SQLINSTANCENAME
 log_file=$backup_path/audit.log
 
 mkdir -p $mysql_repl_path
