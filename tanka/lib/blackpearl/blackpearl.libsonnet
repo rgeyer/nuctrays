@@ -68,9 +68,26 @@ local configMap = k.core.v1.configMap,
         '/bin/sh',
         '-c'
       ]) +
-      container.withArgsMixin([
-        "openvpn --config 'vpn/client.ovpn' --auth-user-pass 'vpn/auth.txt' --script-security 3 --route-up /tmp/route/route-override.sh;"
-      ]) +
+      container.withArgsMixin([|||
+        beforeip=$(curl ifconfig.me)
+        echo "Internet IP before VPN is ${beforeip}"
+        openvpn --config 'vpn/client.ovpn' --auth-user-pass 'vpn/auth.txt' --script-security 3 --route-up /tmp/route/route-override.sh --writepid /var/run/openvpn.pid --log /var/log/openvpn --daemon
+
+        until [ -f /var/run/openvpn.complete ]
+        do
+          sleep 3
+        done
+        sleep 3 # One more time, just to make sure openvpn is totally ready to go
+        rm -rf /var/run/openvpn.complete # Delete this incase we reboot or fail
+        afterip=$(curl ifconfig.me)
+        echo "Internet IP after VPN is ${afterip}"
+
+        if [[ "${beforeip}" == "${afterip}" ]]; then
+          echo "VPN didn't seem to initialize or routes didn't apply. This pod is still using the non VPN internet IP"
+          exit 1
+        fi
+        tail -f /var/log/openvpn
+      |||]) +
       container.securityContext.withPrivileged(true) +
       container.securityContext.capabilities.withAdd('NET_ADMIN') +
       container.withVolumeMountsMixin([        
@@ -161,7 +178,8 @@ local configMap = k.core.v1.configMap,
         this.sonarr_container,
         this.lidarr_container,
         this.readarr_container,
-        this.nzbget_container,]) +
+        this.nzbget_container,
+      ]) +
       statefulSet.spec.template.spec.withInitContainers(this.init_container) +
       statefulSet.spec.template.spec.withVolumes([
         volume.fromConfigMap('route-script','route-script',
