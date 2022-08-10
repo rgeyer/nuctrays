@@ -23,10 +23,13 @@ local traefik = import 'traefik/main.libsonnet',
       traefikingress = import 'traefik/ingress.libsonnet',
       traefikmiddlewares = import 'traefik/mymiddlewares.libsonnet';
 
+local prom = import '0.57/main.libsonnet';
+local pm = prom.monitoring.v1.podMonitor;
+
 config + secrets {
   _images+:: {
     traefik: 'traefik:2.8',
-    registry: 'registry:2',
+    registry: 'registry:2.8.1',
   },
 
   _config+:: {
@@ -112,18 +115,33 @@ config + secrets {
     'traefikzone=public',
   ),
 
+  traefikPodMonitor:
+    pm.new('traefik') +
+    pm.metadata.withLabels({instance: 'primary-me'}) +
+    pm.spec.selector.withMatchLabels({name: 'traefik'}) +
+    pm.spec.namespaceSelector.withAny(true) +
+    pm.spec.withPodMetricsEndpoints([
+      pm.spec.podMetricsEndpoints.withHonorLabels(true) +
+      pm.spec.podMetricsEndpoints.withPort('http-metrics')
+    ]),
+
   registrypvc:
     nfspvc.new('default', $._config.registry.pvc.nfsHost, $._config.registry.pvc.nfsPath, 'registry'),
 
   registryContainer::
     container.new('registry', $._images.registry) +
+    container.withEnv([
+      k.core.v1.envVar.new('REGISTRY_HTTP_DEBUG_PROMETHEUS_ENABLED', 'true'),
+      k.core.v1.envVar.new('REGISTRY_HTTP_DEBUG_ADDR', ':5001')
+    ]) +
     container.withPorts([
       containerPort.new('registry', 5000),
+      containerPort.new('http-metrics', 5001),
     ]) +
     container.withVolumeMountsMixin([
       volumeMount.new('registry', '/var/lib/registry'),
     ]),
-  
+
   registryStatefulSet:
     statefulSet.new('registry', 1, $.registryContainer) +
     statefulSet.spec.withServiceName('registry') +
@@ -138,4 +156,13 @@ config + secrets {
 
   registryIngress:
     traefikingress.newIngressRoute('registry', 'default', 'registry.ryangeyer.com', 'registry', 5000),
+
+  registryPodMonitor:
+    pm.new('registry') +
+    pm.metadata.withLabels({instance: 'primary-me'}) +
+    pm.spec.selector.withMatchLabels({name: 'registry'}) +
+    pm.spec.withPodMetricsEndpoints([
+      pm.spec.podMetricsEndpoints.withHonorLabels(true) +
+      pm.spec.podMetricsEndpoints.withPort('http-metrics')
+    ]),
 }

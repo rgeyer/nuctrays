@@ -20,6 +20,9 @@ local traefikingress = import 'traefik/ingress.libsonnet';
 
     container::
       container.new('registry', this._images.registry) +
+      container.withEnv([
+        k.core.v1.envVar.new('REGISTRY_PROMETHEUS_ENABLED', 'true'),
+      ]) +
       container.withPorts([
         containerPort.new('http', 5000),
       ]) +

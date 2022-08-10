@@ -64,7 +64,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
       container.withPorts([
         containerPort.new('web', 80),
         containerPort.new('websecure', 443),
-        containerPort.new('metrics', 8080),
+        containerPort.new('http-metrics', 8080),
       ]) +
       container.withArgsMixin([
         '--api.dashboard=true',

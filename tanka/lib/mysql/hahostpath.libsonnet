@@ -11,6 +11,9 @@ local container = k.core.v1.container,
       pvc = k.core.v1.persistentVolumeClaim,
       secret = k.core.v1.secret;
 
+local prom = import '0.57/main.libsonnet';
+local sm = prom.monitoring.v1.serviceMonitor;
+
 {
   primary_pv:
     pv.new('mysqlprimary-pv%s' % $._config.hahostpath.suffix) +
@@ -91,7 +94,7 @@ local container = k.core.v1.container,
   mysqlbak_container::
     container.new('mysqlbak', $._images.mysql) +
     container.withEnv([
-      k.core.v1.envVar.new('SQLINSTANCENAME', std.stripChars($._config.hahostpath.suffix, '-')),
+      k.core.v1.envVar.new('SQLINSTANCENAME', $._config.hahostpath.backup_instance_name),
       k.core.v1.envVar.fromSecretRef('SQLPASS', 'mysql', 'mysql-root-password'),
       k.core.v1.envVar.new('SQLHOST', 'mysql%s-secondary.%s.svc.cluster.local' % [$._config.hahostpath.suffix, $._config.namespace]),
       k.core.v1.envVar.new('SQLUSER', 'root'),
@@ -111,5 +114,19 @@ local container = k.core.v1.container,
     cronJob.mixin.spec.jobTemplate.spec.template.spec.withVolumesMixin([
       k.core.v1.volume.fromConfigMap('scripts', 'backup-scripts'),
       k.core.v1.volume.fromPersistentVolumeClaim('backup', 'backups-pvc'),
+    ]),
+
+  serviceMonitor:
+    sm.new('mysql%s' % $._config.hahostpath.suffix) +
+    sm.metadata.withLabels({instance: 'primary-me'}) +
+    sm.spec.selector.withMatchLabels({
+      'app.kubernetes.io/component': 'metrics',
+      'app.kubernetes.io/instance': 'mysql%s' % $._config.hahostpath.suffix,      
+      'app.kubernetes.io/name': 'mysql',
+    }) +
+    sm.spec.namespaceSelector.withMatchNames([$._config.namespace]) +
+    sm.spec.withEndpoints([
+      sm.spec.endpoints.withHonorLabels(true) +
+      sm.spec.endpoints.withPort('metrics'),
     ]),
 }

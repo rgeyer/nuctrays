@@ -64,11 +64,21 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/jsonnet-libs/prometheus-operator-libsonnet.git",
+          "subdir": "0.57"
+        }
+      },
+      "version": "daddbdd13374107f78a2489301f7c23ae1eb0b16",
+      "sum": "8+yZ7FalORuq5ZGpqSnSa+/4YQcPa7x9rClXcjgGCq0="
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/kubernetes/kube-state-metrics.git",
           "subdir": "jsonnet/kube-state-metrics"
         }
       },
-      "version": "c02c4cd32fb7d0f792c757c86b267ea633b52117",
+      "version": "0567e1e1b981755e563d2244fa1659563f2cddbc",
       "sum": "P0dCnbzyPScQGNXwXRcwiPkMLeTq0IPNbSTysDbySnM="
     }
   ],

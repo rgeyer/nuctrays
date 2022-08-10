@@ -35,7 +35,7 @@ local hg_secret(hg_org, namespace) = {
     for hg_org in std.objectFields(secrets._config.hosted_grafana_orgs)
   ],
 
-  grafana_agent_operator: helm.template('grafana-agent-operator', '../../charts/grafana-agent-operator', {
+  grafana_agent_operator: helm.template('grafana-agent-operator', '../../../charts/grafana-agent-operator', {
     namespace: namespace,
     includeCrds: true,
     noHooks: true,

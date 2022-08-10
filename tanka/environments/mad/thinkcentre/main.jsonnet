@@ -57,6 +57,7 @@ config + secrets {
 
     hahostpath+:: {
       suffix: '-mad',
+      backup_instance_name: 'mad',
       root_password: this.mysql.root_password,
       replication_password: this.mysql.replication_password,
       password: this.mysql.password,
