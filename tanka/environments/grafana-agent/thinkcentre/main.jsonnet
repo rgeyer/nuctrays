@@ -6,6 +6,9 @@ local secrets = import 'secrets.libsonnet';
 
 local grao_integration = import 'grafana-agent-operator/integration.libsonnet';
 
+local grafanaAgent = import '0.26/main.libsonnet';
+local grafanaAgentIntegration = grafanaAgent.monitoring.v1alpha1.integration;
+
 local clusterRole = k.rbac.v1.clusterRole,
       clusterRoleBinding = k.rbac.v1.clusterRoleBinding,
       policyRule = k.rbac.v1.policyRule,
@@ -499,5 +502,18 @@ local hg_secret(hg_org, namespace) = {
         pm.spec.podMetricsEndpoints.relabelings.withTargetLabel('job') +
         pm.spec.podMetricsEndpoints.relabelings.withReplacement('integrations/coredns'),
       ]),
-    ]),
+    ]),  
+
+  // agent integration
+  ga_agent_integration:
+    grafanaAgentIntegration.new('agent') +
+    grafanaAgentIntegration.spec.withName('agent') +
+    grafanaAgentIntegration.spec.type.withUnique(false) +
+    grafanaAgentIntegration.metadata.withLabels({agent: 'grafana-agent-metrics'}) +
+    grafanaAgentIntegration.spec.withConfig({
+      autoscrape: {
+        enable: true,
+        metrics_instance: 'grafana-agent/primary-me',
+      },
+    }),
 }
