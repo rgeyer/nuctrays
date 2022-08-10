@@ -72,14 +72,14 @@
     traefik+:: {
       private: {
         pvc: {
-          nfsHost: '192.168.42.100',
-          nfsPath: '/mnt/brick/nfs/traefik',
+          nfsHost: '192.168.42.10',
+          nfsPath: '/kubestore/traefik',
         },
       },
       public: {
         pvc: {
-          nfsHost: '192.168.42.100',
-          nfsPath: '/mnt/brick/nfs/traefik',
+          nfsHost: '192.168.42.10',
+          nfsPath: '/kubestore/traefik',
         },
       },
     },
