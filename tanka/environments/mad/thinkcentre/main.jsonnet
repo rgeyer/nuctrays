@@ -20,6 +20,9 @@ local rocketmad = import 'rocketmad/main.libsonnet';
 local madbe = import 'madbe/main.libsonnet';
 local madsql = import 'mysql/hahostpath.libsonnet';
 
+local grafanaAgent = import '0.26/main.libsonnet';
+local grafanaAgentIntegration = grafanaAgent.monitoring.v1alpha1.integration;
+
 config + secrets {
   _images+:: {
     namefetcher: 'registry.ryangeyer.com/namefetcher:upstream',
@@ -198,5 +201,20 @@ config + secrets {
     cronJob.mixin.spec.jobTemplate.spec.template.spec.withRestartPolicy('Never') +
     cronJob.mixin.spec.jobTemplate.spec.template.spec.withVolumesMixin([
       k.core.v1.volume.fromConfigMap('scripts', 'dbmaintscripts'),
-    ]),
+    ]), 
+
+  psqlGrafanaAgentIntegration:
+    grafanaAgentIntegration.new('postgis') +
+    grafanaAgentIntegration.spec.withName('postgres') +
+    grafanaAgentIntegration.spec.type.withUnique(false) +
+    grafanaAgentIntegration.metadata.withLabels({agent: 'grafana-agent-metrics'}) +
+    grafanaAgentIntegration.spec.withConfig({
+      data_source_names: [
+        'postgresql://%(username)s:%(password)s@postgis.mad.svc.cluster.local/postgres?sslmode=disable' % $._config.mad.psql_exporter,
+      ],
+      autoscrape: {
+        enable: true,
+        metrics_instance: 'grafana-agent/primary-me',
+      },
+    }),
 }
