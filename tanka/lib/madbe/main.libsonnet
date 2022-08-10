@@ -110,6 +110,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
 
   container::
     container.new('madbe', $._images.madbe) +
+    container.withImagePullPolicy('Always') +
     container.withCommand(['/runscript/run.sh']) +
     container.withArgs([
       '--no_log_colors',
@@ -156,7 +157,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
     ]),
 
   deployment:
-    deployment.new('madbe', 1, $.container) +    
+    deployment.new('madbe', 1, $.container) +
     deployment.spec.template.spec.withInitContainers($.initContainer) +
     deployment.spec.strategy.withType('Recreate') +
     deployment.mixin.metadata.withNamespace($._config.namespace) +
