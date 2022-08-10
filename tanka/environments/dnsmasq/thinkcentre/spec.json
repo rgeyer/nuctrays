@@ -6,7 +6,7 @@
   },
   "spec": {
     "apiServer": "https://192.168.42.200:6443",
-    "namespace": "sharedsvcs",
+    "namespace": "sharedsvc",
     "resourceDefaults": {},
     "expectVersions": {}
   }
