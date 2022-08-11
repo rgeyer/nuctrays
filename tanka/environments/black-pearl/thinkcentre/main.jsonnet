@@ -1,22 +1,45 @@
+local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
+local pv = k.core.v1.persistentVolume,
+      pvc = k.core.v1.persistentVolumeClaim,
+      statefulSet = k.apps.v1.statefulSet;
+
 local blackpearl = import 'blackpearl/blackpearl.libsonnet';
+local nfspvc = import 'k8sutils/nfspvc.libsonnet';
 local secrets = import 'secrets.libsonnet';
 local traefikingress = import 'traefik/ingress.libsonnet';
-local nfspvc = import 'k8sutils/nfspvc.libsonnet';
+local speedtest = import 'speedtest/main.libsonnet';
 
 local namespace = 'sharedsvc';
 local name = 'blackpearl';
 
 secrets {
+  makeHostPvPair(name, namespace, path):: {
+    pv:
+      pv.new('%s-pv' % name) +
+      pv.spec.withAccessModes('ReadWriteOnce') +
+      pv.spec.withCapacity({ storage: '1Gi' }) +
+      pv.spec.withStorageClassName('manual') +
+      pv.spec.hostPath.withPath(path),
+
+    pvc:
+      pvc.new('%s-pvc' % name) +
+      pvc.spec.withAccessModes('ReadWriteOnce') +
+      pvc.spec.withStorageClassName('manual') +
+      pvc.spec.withVolumeName('%s-pv' % name) +
+      pvc.spec.resources.withRequests({ storage: '1Gi' }) +
+      pvc.mixin.metadata.withNamespace(namespace),
+  },
+
   radarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/radarrconfig', 'radarrconfig'),
+    $.makeHostPvPair('radarrconfig', namespace, '/opt/kubehostpaths/blackpearl/radarrconfig'),
   sonarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/sonarrconfig', 'sonarrconfig'),
+    $.makeHostPvPair('sonarrconfig', namespace, '/opt/kubehostpaths/blackpearl/sonarrconfig'),
   lidarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/lidarrconfig', 'lidarrconfig'),
+    $.makeHostPvPair('lidarrconfig', namespace, '/opt/kubehostpaths/blackpearl/lidarrconfig'),
   readarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/readarrconfig', 'readarrconfig'),
+    $.makeHostPvPair('readarrconfig', namespace, '/opt/kubehostpaths/blackpearl/readarrconfig'),
   nzbgetconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/nzbgetconfig', 'nzbgetconfig'),
+    $.makeHostPvPair('nzbgetconfig', namespace, '/opt/kubehostpaths/blackpearl/nzbgetconfig'),
   media:
     nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/media', 'media'),
 
@@ -30,7 +53,12 @@ secrets {
       readarrconfig: 'readarrconfig-pvc',
       nzbgetconfig: 'nzbgetconfig-pvc',
       media: 'media-pvc',
-    }),
+    }) +
+    {
+      statefulset+:
+        statefulSet.spec.template.spec.withNodeName('thinkcentre2') +
+        statefulSet.spec.template.spec.withContainersMixin(speedtest.newContainer().container),
+    },
 
   radarringress: traefikingress.newIngressRoute('radarr', namespace, 'radarr.ryangeyer.com', name, 7878),
   sonarringress: traefikingress.newIngressRoute('sonarr', namespace, 'sonarr.ryangeyer.com', name, 8989),
