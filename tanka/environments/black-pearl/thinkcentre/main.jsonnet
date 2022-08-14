@@ -9,6 +9,9 @@ local secrets = import 'secrets.libsonnet';
 local traefikingress = import 'traefik/ingress.libsonnet';
 local speedtest = import 'speedtest/main.libsonnet';
 
+local prom = import '0.57/main.libsonnet';
+local sm = prom.monitoring.v1.serviceMonitor;
+
 local namespace = 'sharedsvc';
 local name = 'blackpearl';
 
@@ -64,5 +67,18 @@ secrets {
   sonarringress: traefikingress.newIngressRoute('sonarr', namespace, 'sonarr.ryangeyer.com', name, 8989),
   lidarringress: traefikingress.newIngressRoute('lidarr', namespace, 'lidarr.ryangeyer.com', name, 8686),
   readarringress: traefikingress.newIngressRoute('readarr', namespace, 'readarr.ryangeyer.com', name, 8787),
-  nzbgetingress: traefikingress.newIngressRoute('nzbget', namespace, 'nzbget.ryangeyer.com', name, 6789),
+  nzbgetingress: traefikingress.newIngressRoute('nzbget', namespace, 'nzbget.ryangeyer.com', name, 6789),  
+
+  vpnSpeedtestPodMonitor:
+    sm.new('speedtest-vpn') +
+    sm.metadata.withLabels({ instance: 'primary-me' }) +
+    sm.spec.selector.withMatchLabels({ name: 'blackpearl' }) +
+    sm.spec.namespaceSelector.withMatchNames([namespace]) +
+    sm.spec.withEndpoints([
+      sm.spec.endpoints.withHonorLabels(true) +
+      sm.spec.endpoints.withPort('speedtest-http') +
+      sm.spec.endpoints.withPath('/probe') +
+      sm.spec.endpoints.withInterval('10m') +
+      sm.spec.endpoints.withScrapeTimeout('2m'),
+    ]),
 }

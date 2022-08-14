@@ -19,4 +19,8 @@ requires:
   version: 0.2.2
 - chart: traefik/traefik
   version: 10.24.0
+- chart: bitnami/postgresql-ha
+  version: 9.3.2
+- chart: bitnami/postgresql
+  version: 11.6.26
 version: 1
