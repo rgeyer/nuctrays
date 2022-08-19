@@ -1,0 +1,17 @@
+- job_name: qnap-rclone
+  relabel_configs:
+  - action: hashmod
+    modulus: $(SHARDS)
+    source_labels:
+    - __address__
+    target_label: __tmp_hash
+  - action: keep
+    regex: $(SHARD)
+    source_labels:
+    - __tmp_hash
+  basic_auth:
+    username: %(qnap.rclone.user)s
+    password: %(qnap.rclone.pass)s
+  static_configs:
+  - targets: ['192.168.1.10:5572']
+  

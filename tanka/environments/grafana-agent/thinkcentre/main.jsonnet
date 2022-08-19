@@ -33,7 +33,7 @@ local hg_secret(hg_org, namespace) = {
              secret.mixin.metadata.withNamespace(namespace),
 };
 
-{
+secrets {
   namespace: k.core.v1.namespace.new(namespace),
 
   hg_secrets: [
@@ -141,6 +141,16 @@ local hg_secret(hg_org, namespace) = {
     },
   },
 
+  extra_scrape_job_secret:
+    secret.new('ga-extra-scrape-jobs', {}) +
+    secret.metadata.withNamespace(namespace) +
+    secret.withStringData({
+      'additionalScrapeConfigs.yaml': (importstr './additionalScrapeConfigs.yaml') % {
+        'qnap.rclone.user': $._config.qnap.rclone.user,
+        'qnap.rclone.pass': $._config.qnap.rclone.pass,
+      },
+    }),
+
   // Metrics Instance CR
   ga_metrics_instance: {
     apiVersion: 'monitoring.grafana.com/v1alpha1',
@@ -151,10 +161,14 @@ local hg_secret(hg_org, namespace) = {
       labels: { agent: 'grafana-agent-metrics' },
     },
     spec: {
+      additionalScrapeConfigs: {
+        name: 'ga-extra-scrape-jobs',
+        key: 'additionalScrapeConfigs.yaml',
+      },
       remoteWrite:
-        [
-          { url: 'http://cortex.cortex.svc.cluster.local/api/prom/push' },
-        ] +
+        // [
+        //   { url: 'http://cortex.cortex.svc.cluster.local/api/prom/push' },
+        // ] +
         [
           {
             local hg_org = secrets._config.hosted_grafana_orgs[hg_slug],
@@ -247,11 +261,6 @@ local hg_secret(hg_org, namespace) = {
                 '__name__',
               ],
             },
-            {
-              action: 'replace',
-              targetLabel: 'job',
-              replacement: 'integrations/kubernetes/kubelet',
-            },
           ],
           port: 'https-metrics',
           relabelings: [
@@ -260,6 +269,11 @@ local hg_secret(hg_org, namespace) = {
                 '__metrics_path__',
               ],
               targetLabel: 'metrics_path',
+            },
+            {
+              action: 'replace',
+              targetLabel: 'job',
+              replacement: 'integrations/kubernetes/kubelet',
             },
           ],
           scheme: 'https',
@@ -365,9 +379,9 @@ local hg_secret(hg_org, namespace) = {
               sourceLabels: [
                 '__name__',
               ],
-            }
+            },
           ],
-          relabelings:[
+          relabelings: [
             {
               action: 'replace',
               targetLabel: 'job',
@@ -491,8 +505,8 @@ local hg_secret(hg_org, namespace) = {
   // CoreDNS Pod Monitor
   ga_coredns_pm:
     pm.new('coredns') +
-    pm.metadata.withLabels({instance: 'primary-me'}) +
-    pm.spec.selector.withMatchLabels({'k8s-app': 'kube-dns'}) +
+    pm.metadata.withLabels({ instance: 'primary-me' }) +
+    pm.spec.selector.withMatchLabels({ 'k8s-app': 'kube-dns' }) +
     pm.spec.namespaceSelector.withMatchNames(['kube-system']) +
     pm.spec.withPodMetricsEndpoints([
       pm.spec.podMetricsEndpoints.withHonorLabels(true) +
@@ -502,14 +516,14 @@ local hg_secret(hg_org, namespace) = {
         pm.spec.podMetricsEndpoints.relabelings.withTargetLabel('job') +
         pm.spec.podMetricsEndpoints.relabelings.withReplacement('integrations/coredns'),
       ]),
-    ]),  
+    ]),
 
   // agent integration
   ga_agent_integration:
     grafanaAgentIntegration.new('agent') +
     grafanaAgentIntegration.spec.withName('agent') +
     grafanaAgentIntegration.spec.type.withUnique(false) +
-    grafanaAgentIntegration.metadata.withLabels({agent: 'grafana-agent-metrics'}) +
+    grafanaAgentIntegration.metadata.withLabels({ agent: 'grafana-agent-metrics' }) +
     grafanaAgentIntegration.spec.withConfig({
       autoscrape: {
         enable: true,
