@@ -14,4 +14,18 @@
     password: %(qnap.rclone.pass)s
   static_configs:
   - targets: ['192.168.1.10:5572']
+- job_name: esphome
+  relabel_configs:
+  - action: hashmod
+    modulus: $(SHARDS)
+    source_labels:
+    - __address__
+    target_label: __tmp_hash
+  - action: keep
+    regex: $(SHARD)
+    source_labels:
+    - __tmp_hash
+  static_configs:
+  - targets: ['192.168.1.193', '192.168.1.242', '192.168.1.243']
+
   
