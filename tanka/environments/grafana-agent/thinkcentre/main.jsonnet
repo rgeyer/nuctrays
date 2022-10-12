@@ -11,6 +11,7 @@ local grafanaAgentIntegration = grafanaAgent.monitoring.v1alpha1.integration;
 
 local clusterRole = k.rbac.v1.clusterRole,
       clusterRoleBinding = k.rbac.v1.clusterRoleBinding,
+      configMap = k.core.v1.configMap,
       policyRule = k.rbac.v1.policyRule,
       serviceAccount = k.core.v1.serviceAccount,
       secret = k.core.v1.secret;
@@ -109,7 +110,7 @@ secrets {
       },
     },
     spec: {
-      image: 'grafana/agent:v0.26.1',
+      image: 'grafana/agent:v0.27.1',
       logLevel: 'info',
       serviceAccountName: $.ga_sa.metadata.name,
       enableConfigReadAPI: true,
@@ -213,9 +214,9 @@ secrets {
     },
     spec: {
       clients:
-        [
-          { url: 'http://loki.loki.svc.cluster.local:3100/loki/api/v1/push' },
-        ] +
+        // [
+        //   { url: 'http://loki.loki.svc.cluster.local:3100/loki/api/v1/push' },
+        // ] +
         [
           {
             local hg_org = secrets._config.hosted_grafana_orgs[hg_slug],
@@ -321,11 +322,6 @@ secrets {
                 '__name__',
               ],
             },
-            {
-              action: 'replace',
-              targetLabel: 'job',
-              replacement: 'integrations/kubernetes/cadvisor',
-            },
           ],
           path: '/metrics/cadvisor',
           port: 'https-metrics',
@@ -335,6 +331,11 @@ secrets {
                 '__metrics_path__',
               ],
               targetLabel: 'metrics_path',
+            },
+            {
+              action: 'replace',
+              targetLabel: 'job',
+              replacement: 'integrations/kubernetes/cadvisor',
             },
           ],
           scheme: 'https',
@@ -528,6 +529,44 @@ secrets {
       autoscrape: {
         enable: true,
         metrics_instance: 'grafana-agent/primary-me',
+      },
+    }),
+
+  ga_snmp_config:
+    configMap.new('grafana-agent-snmp-config') +
+    configMap.mixin.metadata.withNamespace(namespace) +
+    configMap.withData({ 'snmp.yml': importstr 'snmp/snmp.yml' }),
+
+  // snmp integration
+  ga_snmp_integration:
+    grafanaAgentIntegration.new('snmp') +
+    grafanaAgentIntegration.spec.withName('snmp') +
+    grafanaAgentIntegration.spec.type.withUnique(true) +
+    grafanaAgentIntegration.metadata.withLabels({ agent: 'grafana-agent-metrics' }) +
+    grafanaAgentIntegration.spec.withConfigMaps([
+      grafanaAgentIntegration.spec.configMaps.withName('grafana-agent-snmp-config') +
+      grafanaAgentIntegration.spec.configMaps.withKey('snmp.yml'),
+    ]) +
+    grafanaAgentIntegration.spec.withConfig({
+      autoscrape: {
+        enable: true,
+        metrics_instance: 'grafana-agent/primary-me',
+      },
+      config_file: '/etc/grafana-agent/integrations/configMaps/%s/grafana-agent-snmp-config/snmp.yml' % namespace,
+      snmp_targets: [
+        {
+          name: 'edgerouter-x',
+          address: '192.168.1.1',
+          module: 'ubnt_router',
+          walk_params: 'erx',
+        },
+      ],
+      walk_params: {
+        erx: {
+          auth: {
+            community: 'ubnt',
+          },          
+        },
       },
     }),
 }
