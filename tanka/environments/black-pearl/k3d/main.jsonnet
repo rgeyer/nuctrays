@@ -6,6 +6,8 @@ local traefikingress = import 'traefik/ingress.libsonnet';
 local k = import 'ksonnet-util/kausal.libsonnet';
 local ingress = k.networking.v1.ingress,
       path = k.networking.v1.httpIngressPath,
+      pv = k.core.v1.persistentVolume,
+      pvc = k.core.v1.persistentVolumeClaim,
       rule = k.networking.v1.ingressRule;
 
 local namespace = 'default';
@@ -27,9 +29,23 @@ secrets {
       ]),
   },
 
+   radarr_pv:
+    pv.new('radarr-pv') +
+    pv.spec.withAccessModes('ReadWriteOnce') +
+    pv.spec.withCapacity({ storage: '1Gi' }) +
+    pv.spec.withStorageClassName('manual') +
+    pv.spec.hostPath.withPath('/tmp/k3d/blackpearl/radarrconfig'),
 
-  radarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/radarrconfig', 'radarrconfig'),
+  radarr_pvc:
+    pvc.new('radarr-pvc') +
+    pvc.spec.withAccessModes('ReadWriteOnce') +
+    pvc.spec.withStorageClassName('manual') +
+    pvc.spec.withVolumeName('radarr-pv') +
+    pvc.spec.resources.withRequests({ storage: '1Gi' }) +
+    pvc.mixin.metadata.withNamespace(namespace),
+
+  // radarrconfig:
+  //   nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/radarrconfig', 'radarrconfig'),
   sonarrconfig:
     nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/sonarrconfig', 'sonarrconfig'),
   lidarrconfig:
@@ -45,7 +61,7 @@ secrets {
     blackpearl.new(name, $._config.blackpearl.ovpn_uname, $._config.blackpearl.ovpn_pass) +
     blackpearl.withNamespace(namespace) +
     blackpearl.withPvcs({
-      radarrconfig: 'radarrconfig-pvc',
+      radarrconfig: 'radarr-pvc',
       sonarrconfig: 'sonarrconfig-pvc',
       lidarrconfig: 'lidarrconfig-pvc',
       readarrconfig: 'readarrconfig-pvc',

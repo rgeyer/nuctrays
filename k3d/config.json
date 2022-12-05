@@ -18,5 +18,11 @@
       "updateDefaultKubeconfig": true,
       "switchCurrentContext": true
     }
-  }
+  },
+  "volumes": [
+    {
+      "volume": "/home/me/Code/nuctrays/k3d/volumes/radarrconfig:/tmp/k3d/blackpearl/radarrconfig",
+      "nodeFilters": ["server:*"]
+    }
+  ]
 }
