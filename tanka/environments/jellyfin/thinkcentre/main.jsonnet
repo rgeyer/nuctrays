@@ -1,11 +1,13 @@
 local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet';
-local nfspvc = import 'k8sutils/nfspvc.libsonnet';
 local container = k.core.v1.container,
       containerPort = k.core.v1.containerPort,
       volume = k.core.v1.volume,
       volumeMount = k.core.v1.volumeMount,
       statefulSet = k.apps.v1.statefulSet,
       service = k.core.v1.service;
+
+local nfspvc = import 'k8sutils/nfspvc.libsonnet';
+local traefikingress = import 'traefik/ingress.libsonnet';
 
 local staticIp = '10.43.0.19';
 local namespace = 'sharedsvc';
@@ -56,4 +58,7 @@ local namespace = 'sharedsvc';
   service:
     k.util.serviceFor($.statefulset) +
     service.mixin.metadata.withNamespace(namespace),
+  
+  ingress:
+    traefikingress.newIngressRoute('jellyfin', namespace, 'jellyfin.ryangeyer.com', 'jellyfin', 8096)
 }
