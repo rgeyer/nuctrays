@@ -44,7 +44,7 @@ config + secrets {
   // Bootstrap Namespaces
   namespaces: {
     [ns]: k.core.v1.namespace.new(ns)
-    for ns in ['sharedsvc', 'ktraefik', 'ptraefik', 'traefik', 'mad']
+    for ns in ['sharedsvc', 'ktraefik', 'ptraefik', 'traefik', 'mad', 'o11y']
   },
 
   // Calico static ip pool
