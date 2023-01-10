@@ -13,6 +13,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
     configMap.mixin.metadata.withNamespace($._config.namespace) +
     configMap.withData({
       'geofence.json': (importstr './geofence.json'),
+      'dts.json': (importstr './dts.json'),
     }),
 
   container::
@@ -36,6 +37,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
       #!/usr/bin/env sh
 
       cp /config/geofence.json /usr/src/app/config/
+      cp /config/dts.json /usr/src/app/config/
 
       cat << EOF > /usr/src/app/config/local.json
       {
