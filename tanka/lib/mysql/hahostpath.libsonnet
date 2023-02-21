@@ -63,7 +63,7 @@ local sm = prom.monitoring.v1.serviceMonitor;
         persistence: {
           existingClaim: 'mysqlprimary-pvc%s' % $._config.hahostpath.suffix,
         },
-        extraFlags: '--sql-mode=NO_ENGINE_SUBSTITUTION --binlog-expire-logs-seconds=172800',
+        extraFlags: '--sql-mode=NO_ENGINE_SUBSTITUTION --binlog-expire-logs-seconds=172800 --max-connections=300',
         extraEnvVars: [
           { name: 'TZ', value: 'America/Los_Angeles' },
         ],
