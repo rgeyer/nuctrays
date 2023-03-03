@@ -23,6 +23,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
 
   container::
     container.new('rocketmad', $._images.rocketmap) +
+    container.withImagePullPolicy('Always') +
     container.withEnv([
       k.core.v1.envVar.new('TZ', 'America/Los_Angeles'),  
       k.core.v1.envVar.fromSecretRef('SQLPASS', $._config.madmysql.secretname, $._config.madmysql.secretpasskey),

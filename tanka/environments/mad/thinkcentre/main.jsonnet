@@ -34,7 +34,7 @@ config + secrets {
     poracle: 'ghcr.io/kartuludus/poraclejs:master',
     rocketmap: 'ghcr.io/cecpk/rocketmad:master',
     git: 'alpine/git',
-    madbe: 'ghcr.io/map-a-droid/mad:master',
+    madbe: 'registry.ryangeyer.com/mapadroid/map-a-droid:1-77777-login-ocr',
     busybox: 'registry.ryangeyer.com/busybox:latest',
   },
 
