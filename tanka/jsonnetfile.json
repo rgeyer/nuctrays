@@ -40,6 +40,15 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/grafana/mimir.git",
+          "subdir": "operations/mimir"
+        }
+      },
+      "version": "main"
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/jsonnet-libs/grafana-agent-libsonnet.git",
           "subdir": "0.26"
         }
@@ -50,7 +59,7 @@
       "source": {
         "git": {
           "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
-          "subdir": "1.19"
+          "subdir": "1.24"
         }
       },
       "version": "main"

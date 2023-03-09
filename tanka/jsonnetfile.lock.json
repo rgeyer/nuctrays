@@ -8,8 +8,28 @@
           "subdir": "production/tanka/grafana-agent"
         }
       },
-      "version": "551defcb34fd2c14ccad0fc1d0d63d2e487790a9",
-      "sum": "gE9GArW7GX0CnKE9P3UOJ+1LQoIQFUuyupIlJVdRvWI="
+      "version": "c7541cc4608d9d64c0da29ba5e9382e383e04abc",
+      "sum": "LZkS6K53K/BtNjBm135xFLkgKuspGGiWo+iJVm+/OWU="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs.git",
+          "subdir": "consul"
+        }
+      },
+      "version": "aaa78e30125378f2aae68fcd29678ea28530e2e1",
+      "sum": "Po3c1Ic96ngrJCtOazic/7OsLkoILOKZWXWyZWl+od8="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs.git",
+          "subdir": "etcd-operator"
+        }
+      },
+      "version": "aaa78e30125378f2aae68fcd29678ea28530e2e1",
+      "sum": "duHm6wmUju5KHQurOe6dnXoKgl5gTUsfGplgbmAOsHw="
     },
     {
       "source": {
@@ -18,8 +38,18 @@
           "subdir": "grafana"
         }
       },
-      "version": "351bfae3eee23db305597f272ef29ec16f99ee49",
+      "version": "e9f44d885c53d9ebdc849203f06ed74c7eccd362",
       "sum": "Y5nheroSOIwmE+djEVPq4OvvTxKenzdHhpEwaR3Ebjs="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs.git",
+          "subdir": "jaeger-agent-mixin"
+        }
+      },
+      "version": "aaa78e30125378f2aae68fcd29678ea28530e2e1",
+      "sum": "nsukyr2SS8h97I2mxvBazXZp2fxu1i6eg+rKq3/NRwY="
     },
     {
       "source": {
@@ -28,8 +58,18 @@
           "subdir": "ksonnet-util"
         }
       },
-      "version": "70204d02a271e7362187d2ddba686058cfa7827b",
-      "sum": "xo1A7iYvJ7OZ64q2dOZY0G8FGHHt+t/+vEJW3bnXHyk="
+      "version": "e9f44d885c53d9ebdc849203f06ed74c7eccd362",
+      "sum": "/pkNOLhRqvQoPA0yYdUuJvpPHqhkCLauAUMD2ZHMIkE="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs.git",
+          "subdir": "memcached"
+        }
+      },
+      "version": "aaa78e30125378f2aae68fcd29678ea28530e2e1",
+      "sum": "SWywAq4U0MRPMbASU0Ez8O9ArRNeoZzb75sEuReueow="
     },
     {
       "source": {
@@ -38,8 +78,18 @@
           "subdir": "tanka-util"
         }
       },
-      "version": "70204d02a271e7362187d2ddba686058cfa7827b",
-      "sum": "AGgjH6IJe/1qwNtxFIiG8V1uyOJZascEydQsNrfPQ4c="
+      "version": "e9f44d885c53d9ebdc849203f06ed74c7eccd362",
+      "sum": "ShSIissXdvCy1izTCDZX6tY7qxCoepE5L+WJ52Hw7ZQ="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/mimir.git",
+          "subdir": "operations/mimir"
+        }
+      },
+      "version": "607d7dcc14fd00809e81a738bef7d1499b69de45",
+      "sum": "50tMkjPYEHNAq8ohZEhJY8cI4A+7hFgwFsQm7TpOS74="
     },
     {
       "source": {
@@ -48,8 +98,8 @@
           "subdir": "doc-util"
         }
       },
-      "version": "fc3f9bca2dff836b0e924a993bdf11bc51af78d4",
-      "sum": "JUBWG9ybm0TlY3uCWrNoQS00BcfPlCvuK9jPFU0NIj8="
+      "version": "c9cc5534fc5197fb256f323f6b953a7a6bfd9ed6",
+      "sum": "BlqtCzZg0p9B69rQISOsdZpOZVjov7+7ul80zPmh82M="
     },
     {
       "source": {
@@ -58,18 +108,18 @@
           "subdir": "0.26"
         }
       },
-      "version": "4763fb9dd69acd7c32ea34a708328ad7d1984100",
+      "version": "453a4840cdf9786d5fda86af2c103d397797879d",
       "sum": "AcBuxWZhGRgcfHFUxYRUOhAnQ9FnEP37fVl68jAQNc8="
     },
     {
       "source": {
         "git": {
           "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
-          "subdir": "1.19"
+          "subdir": "1.24"
         }
       },
-      "version": "78379f6b2c1438b4467f47d04e08f16b4b22e5ba",
-      "sum": "JUHdCuW+vft0EOL9RU0F3EAixZwsZ/G0CY8ixavo21w="
+      "version": "8ecd8500e820a5ef4e0394f64e383b0edb768137",
+      "sum": "fK3PqiecBdOOBhF6YyHdeP2z6qYgb7p9Yw9GtitwH98="
     },
     {
       "source": {
@@ -78,7 +128,7 @@
           "subdir": "0.57"
         }
       },
-      "version": "daddbdd13374107f78a2489301f7c23ae1eb0b16",
+      "version": "8665ba0fa4f1a4b0c96929485a2d3b952d23806a",
       "sum": "8+yZ7FalORuq5ZGpqSnSa+/4YQcPa7x9rClXcjgGCq0="
     },
     {

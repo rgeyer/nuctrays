@@ -12,6 +12,8 @@ repositories:
   url: https://helm.traefik.io/traefik
 - name: traefik
   url: https://helm.traefik.io
+- name: jetstack
+  url: https://charts.jetstack.io
 requires:
 - chart: bitnami/mysql
   version: 8.9.2
@@ -23,4 +25,6 @@ requires:
   version: 9.3.2
 - chart: bitnami/postgresql
   version: 11.6.26
+- chart: jetstack/cert-manager
+  version: 1.11.0
 version: 1
