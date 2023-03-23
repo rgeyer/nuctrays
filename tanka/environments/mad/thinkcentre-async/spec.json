@@ -1,0 +1,14 @@
+{
+  "apiVersion": "tanka.dev/v1alpha1",
+  "kind": "Environment",
+  "metadata": {
+    "name": "environments/mad/thinkcentre-async",
+    "namespace": "madasync"
+  },
+  "spec": {
+    "apiServer": "https://192.168.42.200:6443",
+    "namespace": "madasync",
+    "resourceDefaults": {},
+    "expectVersions": {}
+  }
+}
