@@ -644,8 +644,6 @@ config + secrets {
     service.spec.withType('ClusterIP') +
     service.metadata.withNamespace($._config.namespace),
 
-
-  // TODO: Add the auth middleware.. Somehow..
   madminingress:
     tIngress.new('mad-core') +
     tIngress.metadata.withNamespace($._config.namespace) +
