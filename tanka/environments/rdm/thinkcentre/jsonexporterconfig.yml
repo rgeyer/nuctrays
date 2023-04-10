@@ -1,0 +1,82 @@
+modules:
+  rdm:
+    metrics:
+    - name: gyms_instinct
+      path: "{.data.gyms_instinct}"
+      valuetype: gauge
+    - name: gyms_mystic
+      path: "{.data.gyms_mystic}"
+      valuetype: gauge
+    - name: gyms_neutral
+      path: "{.data.gyms_neutral}"
+      valuetype: gauge
+    - name: gyms_raids
+      path: "{.data.gyms_raids}"
+      valuetype: gauge
+    - name: gyms_total
+      path: "{.data.gyms_total}"
+      valuetype: gauge
+    - name: gyms_valor
+      path: "{.data.gyms_valor}"
+      valuetype: gauge
+    - name: pokemon_active
+      path: "{.data.pokemon_active}"
+      valuetype: gauge
+    - name: pokemon_active_0iv
+      path: "{.data.pokemon_active_0iv}"
+      valuetype: gauge
+    - name: pokemon_active_90iv
+      path: "{.data.pokemon_active_90iv}"
+      valuetype: gauge
+    - name: pokemon_active_100iv
+      path: "{.data.pokemon_active_100iv}"
+      help: Current active pokemon with perfect IVs
+      valuetype: gauge
+    - name: pokemon_active_shiny
+      path: "{.data.pokemon_active_shiny}"
+      valuetype: gauge
+    - name: pokemon_iv_active
+      path: "{.data.pokemon_iv_active}"
+      valuetype: gauge
+    - name: pokemon_iv_total
+      path: "{.data.pokemon_iv_total}"
+      valuetype: counter
+    - name: pokemon_total
+      path: "{.data.pokemon_total}"
+      valuetype: counter
+    - name: pokemon_total_hundo
+      path: "{.data.pokemon_total_hundo}"
+      valuetype: counter
+    - name: pokemon_total_shiny
+      path: "{.data.pokemon_total_shiny}"
+      valuetype: counter
+    - name: pokestops_invasions
+      path: "{.data.pokestops_invasions}"
+      valuetype: gauge
+    - name: pokestops_lures_glacial
+      path: "{.data.pokestops_lures_glacial}"
+      valuetype: gauge
+    - name: pokestops_lures_magnetic
+      path: "{.data.pokestops_lures_magnetic}"
+      valuetype: gauge
+    - name: pokestops_lures_mossy
+      path: "{.data.pokestops_lures_mossy}"
+      valuetype: gauge
+    - name: pokestops_lures_normal
+      path: "{.data.pokestops_lures_normal}"
+      valuetype: gauge
+    - name: pokestops_quests
+      path: "{.data.pokestops_quests}"
+      valuetype: gauge
+    - name: pokestops_total
+      path: "{.data.pokestops_total}"
+      valuetype: gauge
+    - name: spawnpoints_found
+      path: "{.data.spawnpoints_found}"
+      valuetype: gauge
+    - name: spawnpoints_missing
+      path: "{.data.spawnpoints_missing}"
+      valuetype: gauge
+    - name: spawnpoints_total
+      path: "{.data.spawnpoints_total}"
+      valuetype: gauge
