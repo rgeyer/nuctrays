@@ -15,15 +15,15 @@ local namespace = 'sharedsvc';
 {
   media_pvc: nfspvc.new(
     namespace,
-    '192.168.42.10',
-    '/kubestore/plex/media',
+    '192.168.1.20',
+    '/mnt/ZeroThru5/Media',
     'jellyfinmedia',
   ),
 
   config_pvc: nfspvc.new(
     namespace,
-    '192.168.42.10',
-    '/kubestore/jellyfin',
+    '192.168.1.20',
+    '/mnt/ZeroThru5/k8s/thinkcentre/jellyfin',
     'jellyfinconfig',
   ),
 
@@ -32,6 +32,8 @@ local namespace = 'sharedsvc';
     container.withEnvMap({
       TZ: 'America/Los_Angeles',
       JELLYFIN_PublishedServerUrl: staticIp,
+      PUID: '0',
+      PGID: '65534',
     }) +
     container.withPorts([
       containerPort.new('http-metrics', 8096)

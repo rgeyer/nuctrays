@@ -44,7 +44,7 @@ secrets {
   nzbgetconfig:
     $.makeHostPvPair('nzbgetconfig', namespace, '/opt/kubehostpaths/blackpearl/nzbgetconfig'),
   media:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/media', 'media'),
+    nfspvc.new(namespace, '192.168.1.20', '/mnt/ZeroThru5/Media', 'media'),
 
   blackpearl:
     blackpearl.new(name, $._config.blackpearl.ovpn_uname, $._config.blackpearl.ovpn_pass) +
