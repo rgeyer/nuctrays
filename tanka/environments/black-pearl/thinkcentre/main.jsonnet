@@ -43,6 +43,8 @@ secrets {
     $.makeHostPvPair('readarrconfig', namespace, '/opt/kubehostpaths/blackpearl/readarrconfig'),
   nzbgetconfig:
     $.makeHostPvPair('nzbgetconfig', namespace, '/opt/kubehostpaths/blackpearl/nzbgetconfig'),
+  overseerrconfig:
+    $.makeHostPvPair('overseerrconfig', namespace, '/opt/kubehostpaths/blackpearl/overseerr'),
   media:
     nfspvc.new(namespace, '192.168.1.20', '/mnt/ZeroThru5/Media', 'media'),
 
@@ -55,6 +57,7 @@ secrets {
       lidarrconfig: 'lidarrconfig-pvc',
       readarrconfig: 'readarrconfig-pvc',
       nzbgetconfig: 'nzbgetconfig-pvc',
+      overseerrconfig: 'overseerrconfig-pvc',
       media: 'media-pvc',
     }) +
     {
@@ -67,7 +70,8 @@ secrets {
   sonarringress: traefikingress.newIngressRoute('sonarr', namespace, 'sonarr.ryangeyer.com', name, 8989),
   lidarringress: traefikingress.newIngressRoute('lidarr', namespace, 'lidarr.ryangeyer.com', name, 8686),
   readarringress: traefikingress.newIngressRoute('readarr', namespace, 'readarr.ryangeyer.com', name, 8787),
-  nzbgetingress: traefikingress.newIngressRoute('nzbget', namespace, 'nzbget.ryangeyer.com', name, 6789),  
+  nzbgetingress: traefikingress.newIngressRoute('nzbget', namespace, 'nzbget.ryangeyer.com', name, 6789),
+  overseerringress: traefikingress.newIngressRoute('overseerr', namespace, 'overseerr.ryangeyer.com', name, 5055),
 
   vpnSpeedtestPodMonitor:
     sm.new('speedtest-vpn') +

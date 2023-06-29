@@ -150,6 +150,16 @@ local configMap = k.core.v1.configMap,
       container.withPorts([
         containerPort.newNamed(name='http', containerPort=6789),
       ]),
+      
+    overseerr_container::
+      container.new('overseerr', 'lscr.io/linuxserver/overseerr:latest') +
+      container.withPorts([
+        containerPort.new('overseerr', 5055),
+      ]) +
+      container.withVolumeMountsMixin([
+        volMnt.new('overseerrconfig', '/config'),
+        volMnt.new('media', '/media'),
+      ]),
 
     ovpn_config_secret:
       secret.new('ovpn-config', {}) +
@@ -179,6 +189,7 @@ local configMap = k.core.v1.configMap,
         this.lidarr_container,
         this.readarr_container,
         this.nzbget_container,
+        this.overseerr_container
       ]) +
       statefulSet.spec.template.spec.withInitContainers(this.init_container) +
       statefulSet.spec.template.spec.withVolumes([
@@ -197,6 +208,7 @@ local configMap = k.core.v1.configMap,
         volume.fromPersistentVolumeClaim('lidarrconfig', this.pvcs['lidarrconfig']),
         volume.fromPersistentVolumeClaim('readarrconfig', this.pvcs['readarrconfig']),
         volume.fromPersistentVolumeClaim('nzbgetconfig', this.pvcs['nzbgetconfig']),
+        volume.fromPersistentVolumeClaim('overseerrconfig', this.pvcs['overseerrconfig']),
         volume.fromPersistentVolumeClaim('media', this.pvcs['media']),
       ]) +
       // k.util.pvcVolumeMount(this.pvcs['media'], '/media', false) +
