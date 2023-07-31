@@ -654,7 +654,7 @@ config + secrets {
 
   // Grafana agent scrape setup in additionalScrapeConfigs.yaml of agent operator.
 
-  // RDM Nginx reverse proxy
+  // TODO: RDM Nginx reverse proxy - Pretty sure this isn't used?
   rdmnginxfe_cert:
     cm.v1.certificate.new('lsmpogo.com') +
     cm.v1.certificate.spec.withSecretName('lsmpogo-com-tls') +
