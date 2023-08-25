@@ -20,7 +20,7 @@ secrets {
       externalServices: {
         prometheus: {
           host: $._config.hosted_grafana_orgs.ryangeyer.hosted_metrics_host,
-          basic_auth: {
+          basicAuth: {
             username: $._config.hosted_grafana_orgs.ryangeyer.hosted_metrics_tenant,
             password: $._config.hosted_grafana_orgs.ryangeyer.metrics_pub_key,
           },
@@ -28,11 +28,16 @@ secrets {
 
         loki: {
           host: $._config.hosted_grafana_orgs.ryangeyer.hosted_logs_host,
-          basic_auth: {
+          basicAuth: {
             username: $._config.hosted_grafana_orgs.ryangeyer.hosted_logs_tenant,
             password: $._config.hosted_grafana_orgs.ryangeyer.metrics_pub_key,
           },
         },
+      },
+
+      metrics: {
+        podMonitors: { enabled: false },
+        serviceMonitors: { enabled: false },
       },
 
       opencost: {
