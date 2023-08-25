@@ -78,7 +78,7 @@ config + secrets {
       k.core.v1.envVar.new('MEMORY_CACHE_CLEAR_INTERVAL', '900'),
       k.core.v1.envVar.new('MEMORY_CACHE_KEEP_TIME', '3600'),
       k.core.v1.envVar.new('RAW_THREAD_LIMIT', '100'),
-      k.core.v1.envVar.new('LOGINLIMIT_COUNT', '15'),
+      // k.core.v1.envVar.new('LOGINLIMIT_COUNT', '15'),
     ]) +
     container.withPorts([
       k.core.v1.containerPort.new('rdm', 9000),
