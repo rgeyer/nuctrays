@@ -18,6 +18,7 @@ local traefikingress = import 'traefik/ingress.libsonnet';
 
   container::
     container.new('poracle', $._images.poracle) +
+    container.withImagePullPolicy('Always') +
     container.withEnv([
       k.core.v1.envVar.fromSecretRef('SQLUSER', 'poracle-secret', 'username'),
       k.core.v1.envVar.fromSecretRef('SQLPASS', 'poracle-secret', 'password'),
