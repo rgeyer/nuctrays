@@ -397,8 +397,8 @@ config + secrets {
     container.withArgs([|||
       #!/usr/bin/env sh
       mkdir -p /opt/whreceiver
-      curl -o /opt/whreceiver/requirements.txt https://raw.githubusercontent.com/dkmur/aconf/rom/wh_receiver/requirements.txt
-      curl -o /opt/whreceiver/start_whreceiver.py https://raw.githubusercontent.com/dkmur/aconf/rom/wh_receiver/start_whreceiver.py
+      curl -o /opt/whreceiver/requirements.txt https://raw.githubusercontent.com/TechG3n/aconf/master/wh_receiver/requirements.txt
+      curl -o /opt/whreceiver/start_whreceiver.py https://raw.githubusercontent.com/TechG3n/aconf/master/wh_receiver/start_whreceiver.py
       cat << EOF > /opt/whreceiver/config.ini
       [socketserver]
       host = 0.0.0.0

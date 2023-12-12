@@ -198,7 +198,7 @@ secrets {
           arguments {
             instance = "k8s MAD Primary"
             metrics_targets = prometheus.exporter.mysql.madmysqlprimary.targets
-            metrics_receiver = [prometheus.remote_write.grafana_cloud_prometheus.receiver]
+            metrics_receiver = [prometheus.remote_write.metrics_service.receiver]
             logs_receiver = [loki.write.grafana_cloud_loki.receiver]
           }
         }

@@ -16,7 +16,7 @@ repositories:
   url: https://charts.jetstack.io
 requires:
 - chart: bitnami/mysql
-  version: 8.9.2
+  version: 9.14.2
 - chart: grafana/grafana-agent-operator
   version: 0.2.2
 - chart: traefik/traefik
@@ -28,5 +28,5 @@ requires:
 - chart: jetstack/cert-manager
   version: 1.11.0
 - chart: grafana/k8s-monitoring
-  version: 0.1.12
+  version: 0.4.1
 version: 1
