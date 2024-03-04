@@ -394,11 +394,13 @@ config + secrets {
   whreceiver_container::
     container.new('whreceiver', $._images.whreceiver) +
     container.withCommand(['/bin/sh', '-c']) +
+    // TODO: Lock this down to the current SHA I'm using, and include that in config somewhere.
+    // 
     container.withArgs([|||
       #!/usr/bin/env sh
       mkdir -p /opt/whreceiver
-      curl -o /opt/whreceiver/requirements.txt https://raw.githubusercontent.com/TechG3n/aconf/master/wh_receiver/requirements.txt
-      curl -o /opt/whreceiver/start_whreceiver.py https://raw.githubusercontent.com/TechG3n/aconf/master/wh_receiver/start_whreceiver.py
+      curl -o /opt/whreceiver/requirements.txt https://raw.githubusercontent.com/TechG3n/aconf/7bd87451e6f14b49113db5c7403f473586eb82f1/wh_receiver/requirements.txt
+      curl -o /opt/whreceiver/start_whreceiver.py https://raw.githubusercontent.com/TechG3n/aconf/7bd87451e6f14b49113db5c7403f473586eb82f1/wh_receiver/start_whreceiver.py
       cat << EOF > /opt/whreceiver/config.ini
       [socketserver]
       host = 0.0.0.0
@@ -419,7 +421,7 @@ config + secrets {
     container.withEnv([
       k.core.v1.envVar.new('DB_HOST', 'mysql-primary.sharedsvc.svc.cluster.local'),
       k.core.v1.envVar.new('DB_PORT', '3306'),
-      k.core.v1.envVar.new('DB_NAME', 'atvdetails'),
+      k.core.v1.envVar.new('DB_NAME', 'atvdetails_7bd87451e6f14b49113db5c7403f473586eb82f1'),
       k.core.v1.envVar.fromSecretRef('DB_USER', 'whreceiver', 'mysql_user'),
       k.core.v1.envVar.fromSecretRef('DB_PASS', 'whreceiver', 'mysql_pass'),
 
