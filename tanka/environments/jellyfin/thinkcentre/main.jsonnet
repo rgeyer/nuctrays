@@ -28,7 +28,9 @@ local namespace = 'sharedsvc';
   ),
 
   container::
-    container.new('jellyfin', 'lscr.io/linuxserver/jellyfin') +
+    // container.new('jellyfin', 'lscr.io/linuxserver/jellyfin') +
+    container.new('jellyfin', 'linuxserver/jellyfin:latest') +
+    container.withImagePullPolicy('Always') +
     container.withEnvMap({
       TZ: 'America/Los_Angeles',
       JELLYFIN_PublishedServerUrl: staticIp,
