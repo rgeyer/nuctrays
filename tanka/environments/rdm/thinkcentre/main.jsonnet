@@ -90,7 +90,7 @@ config + secrets {
     ]),
 
   rdm_deployment:
-    deployment.new('rdm', 1, $.rdm_container) +
+    deployment.new('rdm', 0, $.rdm_container) +
     deployment.mixin.metadata.withNamespace($._config.namespace) +
     deployment.mixin.spec.template.spec.withVolumesMixin([
       k.core.v1.volume.fromPersistentVolumeClaim('img', 'rdm-img-pvc'),
@@ -218,7 +218,7 @@ config + secrets {
     ]),
 
   rdmtools_deployment:
-    deployment.new('rdmtools', 1, $.rdmtools_container) +
+    deployment.new('rdmtools', 0, $.rdmtools_container) +
     deployment.mixin.metadata.withNamespace($._config.namespace),
 
   rdmtools_service:
@@ -348,15 +348,15 @@ config + secrets {
     ]),
 
   rmap_deployment:
-    deployment.new('reactmap', 1, $.rmap_container) +
+    deployment.new('reactmap', 0, $.rmap_container) +
     deployment.mixin.metadata.withNamespace($._config.namespace),
 
   rmap_service:
     k.util.serviceFor($.rmap_deployment) +
     service.mixin.metadata.withNamespace($._config.namespace),
 
-  rmapingress:
-    traefikingress.newIngressRoute('rmap', $._config.namespace, 'rmap.lsmpogo.com', 'reactmap', 8080, true),
+  // rmapingress:
+  //   traefikingress.newIngressRoute('rmap', $._config.namespace, 'rmap.lsmpogo.com', 'reactmap', 8080, true),
 
   // ATV Details WH Receiver
   whreceiver_secret:
@@ -709,7 +709,7 @@ config + secrets {
     ]),
 
   rdmnginxfe_deployment:
-    deployment.new('rdmnginxfe', 1, $.rdmnginxfe_container) +
+    deployment.new('rdmnginxfe', 0, $.rdmnginxfe_container) +
     deployment.mixin.metadata.withNamespace($._config.namespace) +
     deployment.spec.template.spec.withVolumes([
       volume.fromConfigMap('config', 'rdmnginxfe'),
@@ -739,7 +739,7 @@ config + secrets {
     ]),
 
   jsonexporter_deployment:
-    deployment.new('jsonexporter', 1, $.jsonexporter_container) +
+    deployment.new('jsonexporter', 0, $.jsonexporter_container) +
     deployment.mixin.metadata.withNamespace($._config.namespace) +
     deployment.spec.template.spec.withVolumes([
       volume.fromConfigMap('config', 'jsonexporter'),

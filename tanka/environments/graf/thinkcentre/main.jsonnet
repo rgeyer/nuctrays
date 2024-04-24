@@ -202,6 +202,48 @@ secrets {
             logs_receiver = [loki.write.grafana_cloud_loki.receiver]
           }
         }
+
+        discovery.relabel "dragonite" {
+          targets = discovery.kubernetes.pods.targets
+
+          rule {
+            source_labels = ["__meta_kubernetes_pod_label_name"]
+            regex = "dragonite"
+            action = "keep"
+          }
+          rule {
+            source_labels = ["__meta_kubernetes_pod_name"]
+            target_label = "instance"
+          }
+        }
+
+        prometheus.scrape "dragonite" {
+          job_name     = "dragonite"
+          targets      = discovery.relabel.dragonite.output
+          honor_labels = true
+          forward_to   = [prometheus.relabel.metrics_service.receiver]
+        }
+
+        discovery.relabel "golbat" {
+          targets = discovery.kubernetes.pods.targets
+
+          rule {
+            source_labels = ["__meta_kubernetes_pod_label_name"]
+            regex = "golbat"
+            action = "keep"
+          }
+          rule {
+            source_labels = ["__meta_kubernetes_pod_name"]
+            target_label = "instance"
+          }
+        }
+
+        prometheus.scrape "golbat" {
+          job_name     = "golbat"
+          targets      = discovery.relabel.golbat.output
+          honor_labels = true
+          forward_to   = [prometheus.relabel.metrics_service.receiver]
+        }
       ||| % { mysql_root_password: $._config.mysql.root_password },
     },
   }),
