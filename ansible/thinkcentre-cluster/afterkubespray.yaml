@@ -27,3 +27,13 @@
         path: /etc/hosts
         regexp: '^10.43.0.16 registry.ryangeyer.com registry'
         line: 10.43.0.16 registry.ryangeyer.com registry
+
+    - name: Setup Authorized Keys
+      ansible.posix.authorized_key:
+        user: ryan
+        state: present
+        key: '{{ item }}'
+      with_file:
+        - ../files/ssh/lenovoflex5.pub
+        - ../files/ssh/hp.pub
+        - ../files/ssh/grafanalaptop.pub
