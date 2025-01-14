@@ -484,7 +484,7 @@ config + secrets {
   ovpn_config_secret:
     secret.new('ovpn-config', {}) +
     secret.withStringData({
-      'client.ovpn': importstr './us8362.nordvpn.com.udp1194.ovpn',
+      'client.ovpn': importstr './us8502.nordvpn.com.udp.ovpn',
     },),
 
   ovpn_auth_secret:
@@ -569,7 +569,7 @@ config + secrets {
 
   // TODO: Give the container a static IP and add it to the haproxy config.
   vpnproxy_statefulset:
-    statefulSet.new('vpn-proxy1', 1, {}) +
+    statefulSet.new('vpn-proxy1', 0, {}) +
     statefulSet.spec.withServiceName('vpn-proxy1') +
     statefulSet.spec.template.spec.withInitContainers($.proxyinit_container) +
     statefulSet.spec.template.spec.withContainers([
@@ -643,7 +643,7 @@ config + secrets {
     ]),
 
   haproxy_deployment:
-    deployment.new('haproxy', 1, $.haproxy_container) +
+    deployment.new('haproxy', 0, $.haproxy_container) +
     deployment.mixin.metadata.withNamespace($._config.namespace) +
     deployment.spec.template.spec.withVolumes([
       volume.fromConfigMap('config', 'haproxy') +

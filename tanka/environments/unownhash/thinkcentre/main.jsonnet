@@ -9,12 +9,14 @@ local config = import 'config.libsonnet';
 local secrets = import 'secrets.libsonnet';
 
 local traefikingress = import 'traefik/ingress.libsonnet';
+local traefik = import 'traefik/2.8.0/main.libsonnet';
+local tIngress = traefik.traefik.v1alpha1.ingressRoute;
 
 config + secrets {
   _images+:: {
     koji: 'ghcr.io/turtiesocks/koji:main',
-    dragonite: 'ghcr.io/unownhash/dragonite-public:latest',
-    dragoniteadmin: 'ghcr.io/unownhash/dragonite-public-admin:latest',
+    dragonite: 'ghcr.io/unownhash/dragonite-public:dragonite-v1.9.1',
+    dragoniteadmin: 'ghcr.io/unownhash/dragonite-public-admin:admin-v1.6.0',
     golbat: 'ghcr.io/unownhash/golbat:main',
     rotom: 'ghcr.io/unownhash/rotom:main',
     xilriws: 'ghcr.io/unownhash/xilriws-public:main',
@@ -39,6 +41,7 @@ config + secrets {
       # Uses login proxy as you wish, e.g. Swirlix or Xilriws
       remote_auth_url = "http://xilriws.unownhash.svc.cluster.local:5090/api/v1/login-code"
       # remote_auth_url = "http://mail.ryangeyer.com:5090/api/v1/login-code"
+      token_init_enabled=true
 
       [koji]
       url = "http://koji.unownhash.svc.cluster.local:8080"
@@ -50,12 +53,12 @@ config + secrets {
       [tuning]
       #recycle_gmo_limit = 4900
       #recycle_encounter_limit = 9900
-      #recycle_on_jail=false
-      #minimum_account_reuse_hours = 169
-      #location_delay = 0
+      #recycle_on_jail=true
+      minimum_account_reuse_hours = 12
+      location_delay = 1500
       #fort_location_delay = 0
       #scout_age_limit = 30
-      #token_refresh_only=true
+      token_refresh_only=true
 
       #[accounts]
       #required_level = 30 # used for everything except leveling (quest can force level 31 at specific events)
@@ -254,6 +257,7 @@ config + secrets {
 
   dragonite_container::
     container.new('dragonite', $._images.dragonite) +
+    container.withImagePullPolicy('Always') +
     container.withVolumeMountsMixin([
       k.core.v1.volumeMount.new('config', '/dragonite/config.toml') + k.core.v1.volumeMount.withSubPath('config.toml'),
     ]) +
@@ -277,6 +281,7 @@ config + secrets {
 
   dragonite_admin_container::
     container.new('dragonite-admin', $._images.dragoniteadmin) +
+    container.withImagePullPolicy('Always') +
     container.withEnv([
       k.core.v1.envVar.new('ADMIN_GENERAL_HOST', '0.0.0.0'),
       k.core.v1.envVar.new('ADMIN_GENERAL_PORT', '7273'),
@@ -374,8 +379,89 @@ config + secrets {
   rotom_device_ingress:
     traefikingress.newIngressRoute('rotom', $._config.namespace, 'rotom.lsmpogo.com', 'rotom', 7070, true, false),
 
+  rotom_client_traefik_basic_auth_secret:
+    secret.new('rotom-client-basic-auth-secret', {}) +
+    secret.withType('kubernetes.io/basic-auth') +
+    secret.withStringData({
+      username: $._config.rotom.clientusername,
+      password: $._config.rotom.clientsecret,
+    }) +
+    secret.mixin.metadata.withNamespace($._config.namespace),
+
+  rotom_client_traefik_basic_auth_middleware:
+    {
+      apiVersion: 'traefik.containo.us/v1alpha1',
+      kind: 'Middleware',
+      metadata: {
+        name: 'rotom-client-basic-auth-mw',
+        labels: {
+          traefikzone: 'public',
+        },
+      },
+      spec: {
+        basicAuth: { secret: 'rotom-client-basic-auth-secret' },
+      },
+    },
+
+  rotom_client_ingress:
+    tIngress.new('rotom-client') +
+    tIngress.metadata.withNamespace($._config.namespace) +
+    tIngress.metadata.withLabelsMixin({
+      traefikzone: 'public',
+    }) +
+    tIngress.spec.withEntryPoints(['web']) +
+    tIngress.spec.withRoutes([
+      tIngress.spec.routes.withKind('Rule') +
+      tIngress.spec.routes.withMatch('Host(`rotom-client.lsmpogo.com`)') +
+      tIngress.spec.routes.withMiddlewares(
+        tIngress.spec.routes.middlewares.withName('redirect-websecure') +
+        tIngress.spec.routes.middlewares.withNamespace('traefik'),
+      ) +
+      tIngress.spec.routes.withServices(
+        tIngress.spec.routes.services.withName('rotom') +
+        tIngress.spec.routes.services.withPort(7072),
+      ),
+    ]),
+
+  rotom_client_ingresstls:
+    tIngress.new('rotom-client-tls') +
+    tIngress.metadata.withNamespace($._config.namespace) +
+    tIngress.metadata.withLabelsMixin({
+      traefikzone: 'public',
+    }) +
+    tIngress.spec.withEntryPoints(['websecure']) +
+    tIngress.spec.withRoutes([
+      tIngress.spec.routes.withKind('Rule') +
+      tIngress.spec.routes.withMatch('Host(`rotom-client.lsmpogo.com`)') +
+      tIngress.spec.routes.withMiddlewares(
+        tIngress.spec.routes.middlewares.withName('rotom-client-basic-auth-mw') +
+        tIngress.spec.routes.middlewares.withNamespace($._config.namespace),
+      ) +
+      tIngress.spec.routes.withServices(
+        tIngress.spec.routes.services.withName('rotom') +
+        tIngress.spec.routes.services.withPort(7072),
+      ),
+    ]) +
+    tIngress.spec.tls.withCertResolver('mydnschallenge'),
+  
+  local xilriws_proxies = std.join('\n', std.map(
+    function(p) "http://%s:%s@%s" % [$._config.mpp.username, $._config.mpp.password, p],
+    $._config.mpp.proxies
+  )),
+
   xilriws_container::
     container.new('xilriws', $._images.xilriws) +
+    container.withCommand(['/bin/sh', '-c']) +
+    container.withArgs([|||
+      #!/usr/bin/env sh
+      cat << EOF > /xilriws/proxies.txt
+      %s
+      EOF
+
+      cd /xilriws
+      ./xilriws
+    ||| % xilriws_proxies]) +
+    container.withImagePullPolicy('Always') +
     container.withPorts([
       k.core.v1.containerPort.new('xilriws', 5090),
     ]),
