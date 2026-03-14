@@ -14,7 +14,6 @@ local namespace = 'default';
 local name = 'blackpearl';
 
 secrets {
-
   makeIngress(name, host, svcname, svcport):: {
     ingress:
       ingress.new(name) +
@@ -29,33 +28,37 @@ secrets {
       ]),
   },
 
-   radarr_pv:
-    pv.new('radarr-pv') +
-    pv.spec.withAccessModes('ReadWriteOnce') +
-    pv.spec.withCapacity({ storage: '1Gi' }) +
-    pv.spec.withStorageClassName('manual') +
-    pv.spec.hostPath.withPath('/tmp/k3d/blackpearl/radarrconfig'),
+  makeHostPvPair(name, namespace, path):: {
+    pv:
+      pv.new('%s-pv' % name) +
+      pv.spec.withAccessModes('ReadWriteOnce') +
+      pv.spec.withCapacity({ storage: '1Gi' }) +
+      pv.spec.withStorageClassName('manual') +
+      pv.spec.hostPath.withPath(path),
 
-  radarr_pvc:
-    pvc.new('radarr-pvc') +
-    pvc.spec.withAccessModes('ReadWriteOnce') +
-    pvc.spec.withStorageClassName('manual') +
-    pvc.spec.withVolumeName('radarr-pv') +
-    pvc.spec.resources.withRequests({ storage: '1Gi' }) +
-    pvc.mixin.metadata.withNamespace(namespace),
+    pvc:
+      pvc.new('%s-pvc' % name) +
+      pvc.spec.withAccessModes('ReadWriteOnce') +
+      pvc.spec.withStorageClassName('manual') +
+      pvc.spec.withVolumeName('%s-pv' % name) +
+      pvc.spec.resources.withRequests({ storage: '1Gi' }) +
+      pvc.mixin.metadata.withNamespace(namespace),
+  },
 
-  // radarrconfig:
-  //   nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/radarrconfig', 'radarrconfig'),
+  radarrconfig:
+    $.makeHostPvPair('radarrconfig', namespace, '/opt/kubehostpaths/blackpearl/radarrconfig'),
   sonarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/sonarrconfig', 'sonarrconfig'),
+    $.makeHostPvPair('sonarrconfig', namespace, '/opt/kubehostpaths/blackpearl/sonarrconfig'),
   lidarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/lidarrconfig', 'lidarrconfig'),
+    $.makeHostPvPair('lidarrconfig', namespace, '/opt/kubehostpaths/blackpearl/lidarrconfig'),
   readarrconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/readarrconfig', 'readarrconfig'),
+    $.makeHostPvPair('readarrconfig', namespace, '/opt/kubehostpaths/blackpearl/readarrconfig'),
   nzbgetconfig:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/nzbgetconfig', 'nzbgetconfig'),
+    $.makeHostPvPair('nzbgetconfig', namespace, '/opt/kubehostpaths/blackpearl/nzbgetconfig'),
+  overseerrconfig:
+    $.makeHostPvPair('overseerrconfig', namespace, '/opt/kubehostpaths/blackpearl/overseerr'),
   media:
-    nfspvc.new(namespace, '192.168.42.10', '/kubestore/plex/media', 'media'),
+    nfspvc.new(namespace, '192.168.1.20', '/mnt/ZeroThru5/Media', 'media'),
 
   blackpearl:
     blackpearl.new(name, $._config.blackpearl.ovpn_uname, $._config.blackpearl.ovpn_pass) +
@@ -66,6 +69,7 @@ secrets {
       lidarrconfig: 'lidarrconfig-pvc',
       readarrconfig: 'readarrconfig-pvc',
       nzbgetconfig: 'nzbgetconfig-pvc',
+      overseerrconfig: 'overseerrconfig-pvc',
       media: 'media-pvc',
     }),
 
@@ -75,4 +79,5 @@ secrets {
   lidarringress: $.makeIngress('lidarr', 'lidarr.k3d.localhost', name, 8686),
   readarringress: $.makeIngress('readarr', 'readarr.k3d.localhost', name, 8787),
   nzbgetingress: $.makeIngress('nzbget', 'nzbget.k3d.localhost', name, 6789),
+  overseerringress: $.makeIngress('overseerr', 'overseerr.k3d.localhost', name, 5055),
 }
