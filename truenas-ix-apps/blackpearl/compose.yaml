@@ -185,9 +185,10 @@ services:
       - ${MEDIA_PATH}:/media
 
   overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
+    image: ghcr.io/seerr-team/seerr:latest
     container_name: blackpearl-overseerr
     restart: unless-stopped
+    init: true
     network_mode: service:vpn
     depends_on:
       vpn:
@@ -195,7 +196,7 @@ services:
     environment:
       TZ: ${TZ}
     volumes:
-      - ${OVERSEERR_CONFIG_PATH}:/config
+      - ${OVERSEERR_CONFIG_PATH}:/app/config
       - ${MEDIA_PATH}:/media
 
   # speedtest:

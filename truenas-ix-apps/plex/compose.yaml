@@ -23,4 +23,4 @@ services:
       - ADVERTISE_IP=http://${HOST_IP}:32400
     volumes:
       - ${PLEX_CONFIG_PATH}:/config
-      - ${MEDIA_PATH}:/media
+      - ${MEDIA_PATH}:/media:ro
