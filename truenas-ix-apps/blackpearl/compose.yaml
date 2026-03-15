@@ -4,37 +4,46 @@ networks:
   traefik-private:
     external: true
 
-volumes:
-  media:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: "addr=${MEDIA_NFS_SERVER},rw,nfsvers=4"
-      device: ":${MEDIA_NFS_PATH}"
-
 services:
 
   vpn:
-    image: dperson/openvpn-client
+    image: qmcgaw/gluetun:latest
     container_name: blackpearl-vpn
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
-    privileged: true
     networks:
       - traefik-private
     environment:
       TZ: ${TZ}
-      FIREWALL: "1"
+      VPN_SERVICE_PROVIDER: nordvpn
+      VPN_TYPE: openvpn
+      OPENVPN_USER: ${VPN_USER}
+      OPENVPN_PASSWORD: ${VPN_PASSWORD}
+      SERVER_COUNTRIES: ${VPN_SERVER_COUNTRIES}
+      # DNS server used inside the tunnel — NordVPN's DNS resolver
+      DNS_ADDRESS: ${VPN_DNS}
+      # Disable DNS over TLS — use plain DNS through the tunnel instead.
+      # DoT requires an extra bootstrap resolution step that can fail on
+      # restricted networks before the tunnel is fully established.
+      DOT: "off"
+      # Disable gluetun's built-in DNS blocklists — they block legitimate
+      # Usenet providers under the "malicious" category.
+      BLOCK_MALICIOUS: "off"
+      # Block all traffic that doesn't go through the VPN tunnel
+      FIREWALL_OUTBOUND_SUBNETS: ""
     volumes:
-      - ./vpn/client.ovpn:/vpn/client.ovpn:ro
-      - ./vpn/auth.txt:/vpn/auth.txt:ro
+      - /mnt/.ix-apps/app_configs/blackpearl/gluetun:/gluetun
     devices:
       - /dev/net/tun
-    dns:
-      - 1.1.1.1
-      - 8.8.8.8
-      - 8.8.4.4
+    # Healthcheck confirms the tun0 interface is up before app containers
+    # are allowed to attach to this container's network namespace.
+    healthcheck:
+      test: ["CMD-SHELL", "ip link show tun0 > /dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     labels:
       - traefik.enable=true
 
@@ -81,69 +90,75 @@ services:
       - traefik.http.services.overseerr.loadbalancer.server.port=5055
 
   radarr:
-    image: hotio/radarr
+    image: ghcr.io/hotio/radarr
     container_name: blackpearl-radarr
     restart: unless-stopped
     network_mode: service:vpn
     depends_on:
-      - vpn
+      vpn:
+        condition: service_healthy
     environment:
       TZ: ${TZ}
     volumes:
       - ${RADARR_CONFIG_PATH}:/config
-      - media:/media
+      - ${MEDIA_PATH}:/media
 
   sonarr:
-    image: hotio/sonarr:phantom
+    image: ghcr.io/hotio/sonarr:latest
     container_name: blackpearl-sonarr
     restart: unless-stopped
     network_mode: service:vpn
     depends_on:
-      - vpn
+      vpn:
+        condition: service_healthy
     environment:
       TZ: ${TZ}
     volumes:
       - ${SONARR_CONFIG_PATH}:/config
-      - media:/media
+      - ${MEDIA_PATH}:/media
 
-  lidarr:
-    image: hotio/lidarr
-    container_name: blackpearl-lidarr
-    restart: unless-stopped
-    network_mode: service:vpn
-    depends_on:
-      - vpn
-    environment:
-      TZ: ${TZ}
-    volumes:
-      - ${LIDARR_CONFIG_PATH}:/config
-      - media:/media
+  # lidarr:
+  #   # hotio/lidarr was removed from Docker Hub; re-enable using ghcr.io/hotio/lidarr
+  #   # when ready to add music library management.
+  #   image: ghcr.io/hotio/lidarr
+  #   container_name: blackpearl-lidarr
+  #   restart: unless-stopped
+  #   network_mode: service:vpn
+  #   depends_on:
+  #     - vpn
+  #   environment:
+  #     TZ: ${TZ}
+  #   volumes:
+  #     - ${LIDARR_CONFIG_PATH}:/config
+  #     - ${MEDIA_PATH}:/media
 
   readarr:
-    image: hotio/readarr:nightly-0.1.0.619
+    image: lscr.io/linuxserver/readarr:0.4.19-nightly
     container_name: blackpearl-readarr
     restart: unless-stopped
     network_mode: service:vpn
     depends_on:
-      - vpn
+      vpn:
+        condition: service_healthy
     environment:
       TZ: ${TZ}
     volumes:
       - ${READARR_CONFIG_PATH}:/config
-      - media:/media
+      - ${MEDIA_PATH}:/media
 
   nzbget:
-    image: hotio/nzbget
+    image: ghcr.io/hotio/nzbget
     container_name: blackpearl-nzbget
     restart: unless-stopped
     network_mode: service:vpn
     depends_on:
-      - vpn
+      vpn:
+        condition: service_healthy
     environment:
       TZ: ${TZ}
     volumes:
       - ${NZBGET_CONFIG_PATH}:/config
-      - media:/media
+      - ${MEDIA_PATH}:/media
 
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
@@ -151,12 +166,13 @@ services:
     restart: unless-stopped
     network_mode: service:vpn
     depends_on:
-      - vpn
+      vpn:
+        condition: service_healthy
     environment:
       TZ: ${TZ}
     volumes:
       - ${OVERSEERR_CONFIG_PATH}:/config
-      - media:/media
+      - ${MEDIA_PATH}:/media
 
   # speedtest:
   #   # The speedtest container exposes a Prometheus metrics endpoint at :9516/probe

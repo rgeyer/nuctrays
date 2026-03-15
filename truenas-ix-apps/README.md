@@ -179,17 +179,29 @@ Open `.rendered/<app>/compose.yaml` and confirm all values look correct before p
 3. Paste the contents of `.rendered/<app>/compose.yaml` into the YAML editor
 4. Click **Save**
 
-### Step 5 — blackpearl only: place VPN credentials
+### Step 5 — blackpearl only: place VPN config
 
-The VPN credentials cannot be inlined into the compose file — they must be placed as files on the TrueNAS host. If you used the placeholder app to pre-create the directory (recommended), SSH in and place the files:
+The VPN config file must be placed on the TrueNAS host before starting the stack. Credentials are handled via environment variables in `.env` — no `auth.txt` file is needed.
+
+```
+/mnt/.ix-apps/app_configs/blackpearl/client.ovpn
+```
+
+SSH in and copy it from your workstation:
 
 ```bash
-mkdir -p /mnt/.ix-apps/app_configs/blackpearl/versions/1.0.0/templates/rendered/vpn
+# The directory is created by TrueNAS when the placeholder app is deployed,
+# but confirm it exists first:
+ssh root@<truenas-ip> mkdir -p /mnt/.ix-apps/app_configs/blackpearl
 
-# From your workstation, copy the NordVPN config and credentials:
-scp client.ovpn admin@<truenas-ip>:/mnt/.ix-apps/app_configs/blackpearl/versions/1.0.0/templates/rendered/vpn/client.ovpn
-scp auth.txt    admin@<truenas-ip>:/mnt/.ix-apps/app_configs/blackpearl/versions/1.0.0/templates/rendered/vpn/auth.txt
+# From your workstation, copy the NordVPN OpenVPN config:
+scp client.ovpn root@<truenas-ip>:/mnt/.ix-apps/app_configs/blackpearl/client.ovpn
 ```
+
+Get the `client.ovpn` file from [NordVPN's server tools](https://nordvpn.com/servers/tools/) — select a server and download the OpenVPN (UDP or TCP) config. The `auth-user-pass` line in the config will be overridden by gluetun using the `VPN_USER` and `VPN_PASSWORD` values from your `.env`.
+
+NordVPN service credentials (not your account login) are found at:
+https://my.nordaccount.com/dashboard/nordvpn/manual-configuration/
 
 See `blackpearl/vpn/client.ovpn` and `blackpearl/vpn/auth.txt` in this repo for format instructions.
 
