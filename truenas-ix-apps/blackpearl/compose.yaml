@@ -48,6 +48,10 @@ services:
       - traefik.enable=true
 
       # Radarr
+      - traefik.http.routers.radarr-private-web.rule=Host(`${RADARR_HOST}`)
+      - traefik.http.routers.radarr-private-web.entrypoints=web-private
+      - traefik.http.routers.radarr-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.radarr-private-web.service=radarr
       - traefik.http.routers.radarr-private.rule=Host(`${RADARR_HOST}`)
       - traefik.http.routers.radarr-private.entrypoints=websecure-private
       - traefik.http.routers.radarr-private.tls.certresolver=mydnschallenge
@@ -55,20 +59,32 @@ services:
       - traefik.http.services.radarr.loadbalancer.server.port=7878
 
       # Sonarr
+      - traefik.http.routers.sonarr-private-web.rule=Host(`${SONARR_HOST}`)
+      - traefik.http.routers.sonarr-private-web.entrypoints=web-private
+      - traefik.http.routers.sonarr-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.sonarr-private-web.service=sonarr
       - traefik.http.routers.sonarr-private.rule=Host(`${SONARR_HOST}`)
       - traefik.http.routers.sonarr-private.entrypoints=websecure-private
       - traefik.http.routers.sonarr-private.tls.certresolver=mydnschallenge
       - traefik.http.routers.sonarr-private.service=sonarr
       - traefik.http.services.sonarr.loadbalancer.server.port=8989
 
-      # Lidarr
-      - traefik.http.routers.lidarr-private.rule=Host(`${LIDARR_HOST}`)
-      - traefik.http.routers.lidarr-private.entrypoints=websecure-private
-      - traefik.http.routers.lidarr-private.tls.certresolver=mydnschallenge
-      - traefik.http.routers.lidarr-private.service=lidarr
-      - traefik.http.services.lidarr.loadbalancer.server.port=8686
+      # Lidarr (commented out — re-enable when lidarr service is re-enabled)
+      # - traefik.http.routers.lidarr-private-web.rule=Host(`${LIDARR_HOST}`)
+      # - traefik.http.routers.lidarr-private-web.entrypoints=web-private
+      # - traefik.http.routers.lidarr-private-web.middlewares=redirect-to-https-private@docker
+      # - traefik.http.routers.lidarr-private-web.service=lidarr
+      # - traefik.http.routers.lidarr-private.rule=Host(`${LIDARR_HOST}`)
+      # - traefik.http.routers.lidarr-private.entrypoints=websecure-private
+      # - traefik.http.routers.lidarr-private.tls.certresolver=mydnschallenge
+      # - traefik.http.routers.lidarr-private.service=lidarr
+      # - traefik.http.services.lidarr.loadbalancer.server.port=8686
 
       # Readarr
+      - traefik.http.routers.readarr-private-web.rule=Host(`${READARR_HOST}`)
+      - traefik.http.routers.readarr-private-web.entrypoints=web-private
+      - traefik.http.routers.readarr-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.readarr-private-web.service=readarr
       - traefik.http.routers.readarr-private.rule=Host(`${READARR_HOST}`)
       - traefik.http.routers.readarr-private.entrypoints=websecure-private
       - traefik.http.routers.readarr-private.tls.certresolver=mydnschallenge
@@ -76,6 +92,10 @@ services:
       - traefik.http.services.readarr.loadbalancer.server.port=8787
 
       # NZBGet
+      - traefik.http.routers.nzbget-private-web.rule=Host(`${NZBGET_HOST}`)
+      - traefik.http.routers.nzbget-private-web.entrypoints=web-private
+      - traefik.http.routers.nzbget-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.nzbget-private-web.service=nzbget
       - traefik.http.routers.nzbget-private.rule=Host(`${NZBGET_HOST}`)
       - traefik.http.routers.nzbget-private.entrypoints=websecure-private
       - traefik.http.routers.nzbget-private.tls.certresolver=mydnschallenge
@@ -83,6 +103,10 @@ services:
       - traefik.http.services.nzbget.loadbalancer.server.port=6789
 
       # Overseerr
+      - traefik.http.routers.overseerr-private-web.rule=Host(`${OVERSEERR_HOST}`)
+      - traefik.http.routers.overseerr-private-web.entrypoints=web-private
+      - traefik.http.routers.overseerr-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.overseerr-private-web.service=overseerr
       - traefik.http.routers.overseerr-private.rule=Host(`${OVERSEERR_HOST}`)
       - traefik.http.routers.overseerr-private.entrypoints=websecure-private
       - traefik.http.routers.overseerr-private.tls.certresolver=mydnschallenge
