@@ -1,0 +1,24 @@
+name: placeholder
+
+# Placeholder app — used to create the TrueNAS app directory structure before
+# the real compose file is ready to deploy.
+#
+# How to use:
+#   1. Render and deploy this file under the name of the app you want to create
+#      (e.g. name it "blackpearl" in the TrueNAS UI).
+#   2. TrueNAS will create the directory structure at:
+#        /mnt/.ix-apps/app_configs/<app-name>/versions/1.0.0/templates/rendered/
+#   3. SSH in and perform any pre-deployment config steps in that directory
+#      (e.g. create subdirectories, place credential files, etc.).
+#   4. Once ready, re-deploy the app by editing it in the TrueNAS UI and
+#      replacing this YAML with the real rendered compose file.
+#
+# The busybox container sleeps for 10 minutes then exits. TrueNAS will attempt
+# to restart it (restart: unless-stopped is intentionally omitted here), but
+# the app will remain in a known, harmless state while you do your config work.
+
+services:
+  placeholder:
+    image: busybox:latest
+    container_name: placeholder
+    command: ["sleep", "600"]

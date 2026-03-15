@@ -1,0 +1,10 @@
+# Never commit live env files or VPN credentials
+.env
+**/vpn/client.ovpn
+**/vpn/auth.txt
+
+# Never commit ACME certificate JSON (contains private keys)
+**/acme*.json
+
+# Never commit rendered (secrets-filled) compose files
+.rendered/

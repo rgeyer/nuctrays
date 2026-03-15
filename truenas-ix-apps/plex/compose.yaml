@@ -1,0 +1,26 @@
+name: plex
+
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    restart: unless-stopped
+    # host networking is required for Plex to work correctly across VLANs:
+    #   - GDM (LAN discovery) uses UDP multicast which Docker bridge NAT blocks
+    #   - All Plex ports are exposed directly on the host without NAT
+    #   - No port mappings needed — Plex binds directly to the host's interfaces
+    #
+    # IMPORTANT: host networking means Plex listens on ALL host interfaces,
+    # including the AREDN mesh (eno2). Block Plex on that interface with nftables
+    # after deploying — see the "Host Firewall Rules" section in README.md.
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - ADVERTISE_IP=http://${HOST_IP}:32400
+    volumes:
+      - ${PLEX_CONFIG_PATH}:/config
+      - ${MEDIA_PATH}:/media

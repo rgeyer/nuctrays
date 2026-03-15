@@ -1,0 +1,111 @@
+name: traefik
+
+networks:
+  traefik-private:
+    name: traefik-private
+  traefik-public:
+    name: traefik-public
+  traefik-aredn:
+    name: traefik-aredn
+
+services:
+
+  traefik-private:
+    image: traefik:latest
+    container_name: traefik-private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik-private
+    ports:
+      - "${TRAEFIK_PRIVATE_IP}:80:80"
+      - "${TRAEFIK_PRIVATE_IP}:443:443"
+      - "${TRAEFIK_PRIVATE_IP}:8080:8080"
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.network=traefik-private
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.web-private.address=:80
+      - --entrypoints.websecure-private.address=:443
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge=true
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=route53
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge.propagation.disableanschecks=true
+      - --certificatesresolvers.mydnschallenge.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.mydnschallenge.acme.storage=/letsencrypt/acme.json
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${ACME_PRIVATE_PATH}:/letsencrypt/acme.json
+    labels:
+      - traefik.enable=true
+      # Define a reusable redirect-to-https middleware for the private instance.
+      # Services opt in by adding to their router labels:
+      #   traefik.http.routers.<name>.middlewares=redirect-to-https-private@docker
+      - traefik.http.middlewares.redirect-to-https-private.redirectscheme.scheme=https
+      - traefik.http.middlewares.redirect-to-https-private.redirectscheme.permanent=true
+
+  traefik-public:
+    image: traefik:latest
+    container_name: traefik-public
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik-public
+    ports:
+      - "${TRAEFIK_PUBLIC_IP}:80:80"
+      - "${TRAEFIK_PUBLIC_IP}:443:443"
+      - "${TRAEFIK_PUBLIC_IP}:8080:8080"
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.network=traefik-public
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.web-public.address=:80
+      - --entrypoints.websecure-public.address=:443
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge=true
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=route53
+      - --certificatesresolvers.mydnschallenge.acme.dnschallenge.propagation.disableanschecks=true
+      - --certificatesresolvers.mydnschallenge.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.mydnschallenge.acme.storage=/letsencrypt/acme.json
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${ACME_PUBLIC_PATH}:/letsencrypt/acme.json
+    labels:
+      - traefik.enable=true
+      # Define a reusable redirect-to-https middleware for the public instance.
+      # Services opt in by adding to their router labels:
+      #   traefik.http.routers.<name>.middlewares=redirect-to-https-public@docker
+      - traefik.http.middlewares.redirect-to-https-public.redirectscheme.scheme=https
+      - traefik.http.middlewares.redirect-to-https-public.redirectscheme.permanent=true
+
+  traefik-aredn:
+    image: traefik:latest
+    container_name: traefik-aredn
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik-aredn
+    ports:
+      - "${TRAEFIK_AREDN_IP}:80:80"
+      - "${TRAEFIK_AREDN_IP}:8080:8080"
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.network=traefik-aredn
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.web-aredn.address=:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - traefik.enable=false

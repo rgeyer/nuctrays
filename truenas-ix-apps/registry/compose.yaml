@@ -1,0 +1,19 @@
+name: registry
+
+networks:
+  traefik-private:
+    external: true
+
+services:
+  registry:
+    image: registry:2
+    restart: unless-stopped
+    networks:
+      - traefik-private
+    volumes:
+      - ${REGISTRY_DATA_PATH}:/var/lib/registry:rw
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.registry-private.rule=Host(`${REGISTRY_HOST}`)
+      - traefik.http.routers.registry-private.entrypoints=websecure-private
+      - traefik.http.routers.registry-private.tls.certresolver=mydnschallenge

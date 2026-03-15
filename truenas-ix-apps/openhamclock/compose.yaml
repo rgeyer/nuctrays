@@ -1,0 +1,63 @@
+name: openhamclock
+
+networks:
+  traefik-private:
+    external: true
+  traefik-public:
+    external: true
+  traefik-aredn:
+    external: true
+
+services:
+  openhamclock:
+    image: ${REGISTRY_HOST}/openhamclock:latest
+    container_name: openhamclock
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - TZ=${TZ}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 10s
+    networks:
+      - traefik-private
+      - traefik-public
+      - traefik-aredn
+    ports:
+      - "${HOST_IP}:2237:2237/udp"
+    labels:
+      - traefik.enable=true
+
+      # Shared service definition — all routers use port 3000
+      - traefik.http.services.openhamclock.loadbalancer.server.port=3000
+
+      # Private — HTTP redirects to HTTPS
+      - traefik.http.routers.openhamclock-private-web.rule=Host(`${OPENHAMCLOCK_HOST}`)
+      - traefik.http.routers.openhamclock-private-web.entrypoints=web-private
+      - traefik.http.routers.openhamclock-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.openhamclock-private-web.service=openhamclock
+      # Private — HTTPS
+      - traefik.http.routers.openhamclock-private.rule=Host(`${OPENHAMCLOCK_HOST}`)
+      - traefik.http.routers.openhamclock-private.entrypoints=websecure-private
+      - traefik.http.routers.openhamclock-private.tls.certresolver=mydnschallenge
+      - traefik.http.routers.openhamclock-private.service=openhamclock
+
+      # Public — HTTP redirects to HTTPS
+      - traefik.http.routers.openhamclock-public-web.rule=Host(`${OPENHAMCLOCK_HOST}`)
+      - traefik.http.routers.openhamclock-public-web.entrypoints=web-public
+      - traefik.http.routers.openhamclock-public-web.middlewares=redirect-to-https-public@docker
+      - traefik.http.routers.openhamclock-public-web.service=openhamclock
+      # Public — HTTPS
+      - traefik.http.routers.openhamclock-public.rule=Host(`${OPENHAMCLOCK_HOST}`)
+      - traefik.http.routers.openhamclock-public.entrypoints=websecure-public
+      - traefik.http.routers.openhamclock-public.tls.certresolver=mydnschallenge
+      - traefik.http.routers.openhamclock-public.service=openhamclock
+
+      # AREDN — HTTP only, no redirect, separate hostname
+      - traefik.http.routers.openhamclock-aredn.rule=Host(`${OPENHAMCLOCK_AREDN_HOST}`)
+      - traefik.http.routers.openhamclock-aredn.entrypoints=web-aredn
+      - traefik.http.routers.openhamclock-aredn.service=openhamclock
