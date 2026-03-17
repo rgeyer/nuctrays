@@ -30,8 +30,10 @@ services:
       # Disable gluetun's built-in DNS blocklists — they block legitimate
       # Usenet providers under the "malicious" category.
       BLOCK_MALICIOUS: "off"
-      # Block all traffic that doesn't go through the VPN tunnel
-      FIREWALL_OUTBOUND_SUBNETS: ""
+      # Allow direct (non-VPN) access to local LAN subnets — needed for
+      # services like Radarr/Sonarr/Seerr to reach Plex on the local network.
+      # All other outbound traffic is still forced through the VPN tunnel.
+      FIREWALL_OUTBOUND_SUBNETS: ${LAN_SUBNETS}
     volumes:
       - /mnt/.ix-apps/app_configs/blackpearl/gluetun:/gluetun
     devices:
@@ -101,6 +103,28 @@ services:
       - traefik.http.routers.nzbget-private.tls.certresolver=mydnschallenge
       - traefik.http.routers.nzbget-private.service=nzbget
       - traefik.http.services.nzbget.loadbalancer.server.port=6789
+
+      # qBittorrent
+      - traefik.http.routers.qbittorrent-private-web.rule=Host(`${QBITTORRENT_HOST}`)
+      - traefik.http.routers.qbittorrent-private-web.entrypoints=web-private
+      - traefik.http.routers.qbittorrent-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.qbittorrent-private-web.service=qbittorrent
+      - traefik.http.routers.qbittorrent-private.rule=Host(`${QBITTORRENT_HOST}`)
+      - traefik.http.routers.qbittorrent-private.entrypoints=websecure-private
+      - traefik.http.routers.qbittorrent-private.tls.certresolver=mydnschallenge
+      - traefik.http.routers.qbittorrent-private.service=qbittorrent
+      - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
+
+      # Prowlarr
+      - traefik.http.routers.prowlarr-private-web.rule=Host(`${PROWLARR_HOST}`)
+      - traefik.http.routers.prowlarr-private-web.entrypoints=web-private
+      - traefik.http.routers.prowlarr-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.prowlarr-private-web.service=prowlarr
+      - traefik.http.routers.prowlarr-private.rule=Host(`${PROWLARR_HOST}`)
+      - traefik.http.routers.prowlarr-private.entrypoints=websecure-private
+      - traefik.http.routers.prowlarr-private.tls.certresolver=mydnschallenge
+      - traefik.http.routers.prowlarr-private.service=prowlarr
+      - traefik.http.services.prowlarr.loadbalancer.server.port=9696
 
       # Overseerr
       - traefik.http.routers.overseerr-private-web.rule=Host(`${OVERSEERR_HOST}`)
@@ -198,6 +222,45 @@ services:
     volumes:
       - ${OVERSEERR_CONFIG_PATH}:/app/config
       - ${MEDIA_PATH}:/media
+
+  qbittorrent:
+    image: ghcr.io/hotio/qbittorrent
+    container_name: blackpearl-qbittorrent
+    restart: unless-stopped
+    network_mode: service:vpn
+    depends_on:
+      vpn:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ${QBITTORRENT_CONFIG_PATH}:/config
+      - ${MEDIA_PATH}:/media
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: blackpearl-flaresolverr
+    restart: unless-stopped
+    network_mode: service:vpn
+    depends_on:
+      vpn:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ}
+      LOG_LEVEL: info
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr
+    container_name: blackpearl-prowlarr
+    restart: unless-stopped
+    network_mode: service:vpn
+    depends_on:
+      vpn:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ${PROWLARR_CONFIG_PATH}:/config
 
   # speedtest:
   #   # The speedtest container exposes a Prometheus metrics endpoint at :9516/probe

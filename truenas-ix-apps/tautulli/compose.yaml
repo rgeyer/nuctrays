@@ -1,0 +1,33 @@
+name: tautulli
+
+networks:
+  traefik-private:
+    external: true
+
+services:
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    restart: unless-stopped
+    networks:
+      - traefik-private
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${TAUTULLI_CONFIG_PATH}:/config
+    labels:
+      - traefik.enable=true
+
+      # HTTP → HTTPS redirect
+      - traefik.http.routers.tautulli-private-web.rule=Host(`${TAUTULLI_HOST}`)
+      - traefik.http.routers.tautulli-private-web.entrypoints=web-private
+      - traefik.http.routers.tautulli-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.tautulli-private-web.service=tautulli
+      # HTTPS
+      - traefik.http.routers.tautulli-private.rule=Host(`${TAUTULLI_HOST}`)
+      - traefik.http.routers.tautulli-private.entrypoints=websecure-private
+      - traefik.http.routers.tautulli-private.tls.certresolver=mydnschallenge
+      - traefik.http.routers.tautulli-private.service=tautulli
+      - traefik.http.services.tautulli.loadbalancer.server.port=8181
