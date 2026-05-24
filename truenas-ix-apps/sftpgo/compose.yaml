@@ -1,0 +1,68 @@
+name: sftpgo
+
+networks:
+  traefik-private:
+    external: true
+
+services:
+  sftpgo:
+    image: drakkan/sftpgo:latest
+    container_name: sftpgo
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      # Admin / REST / Web UI on :8080
+      - SFTPGO_HTTPD__BINDINGS__0__PORT=8080
+      - SFTPGO_HTTPD__BINDINGS__0__ADDRESS=
+      - SFTPGO_HTTPD__BINDINGS__0__ENABLE_WEB_ADMIN=true
+      - SFTPGO_HTTPD__BINDINGS__0__ENABLE_WEB_CLIENT=true
+      # Trust X-Forwarded-* from Traefik on the traefik-private docker network
+      - SFTPGO_HTTPD__BINDINGS__0__PROXY_ALLOWED=${TRAEFIK_PRIVATE_SUBNET}
+      # WebDAV on :10080
+      - SFTPGO_WEBDAVD__BINDINGS__0__PORT=10080
+      - SFTPGO_WEBDAVD__BINDINGS__0__ADDRESS=
+      - SFTPGO_WEBDAVD__BINDINGS__0__PROXY_ALLOWED=${TRAEFIK_PRIVATE_SUBNET}
+      # Disable SFTP and FTP listeners (not exposed in this deployment)
+      - SFTPGO_SFTPD__BINDINGS__0__PORT=0
+      - SFTPGO_FTPD__BINDINGS__0__PORT=0
+    volumes:
+      - ${SFTPGO_CONFIG_PATH}:/var/lib/sftpgo
+      - ${SFTPGO_DATA_PATH}:/srv/sftpgo/data
+    healthcheck:
+      # The drakkan/sftpgo image has no curl/wget; use bash's /dev/tcp to
+      # confirm the admin/REST port is accepting connections.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - traefik-private
+    labels:
+      - traefik.enable=true
+
+      # --- Two named services, one per container port ---
+      - traefik.http.services.sftpgo-webdav-svc.loadbalancer.server.port=10080
+      - traefik.http.services.sftpgo-admin-svc.loadbalancer.server.port=8080
+
+      # --- WebDAV: HTTP -> HTTPS redirect ---
+      - traefik.http.routers.sftpgo-webdav-private-web.rule=Host(`${SFTPGO_WEBDAV_HOST}`)
+      - traefik.http.routers.sftpgo-webdav-private-web.entrypoints=web-private
+      - traefik.http.routers.sftpgo-webdav-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.sftpgo-webdav-private-web.service=sftpgo-webdav-svc
+      # --- WebDAV: HTTPS ---
+      - traefik.http.routers.sftpgo-webdav-private.rule=Host(`${SFTPGO_WEBDAV_HOST}`)
+      - traefik.http.routers.sftpgo-webdav-private.entrypoints=websecure-private
+      - traefik.http.routers.sftpgo-webdav-private.tls.certresolver=mydnschallenge
+      - traefik.http.routers.sftpgo-webdav-private.service=sftpgo-webdav-svc
+
+      # --- Admin UI: HTTP -> HTTPS redirect ---
+      - traefik.http.routers.sftpgo-admin-private-web.rule=Host(`${SFTPGO_ADMIN_HOST}`)
+      - traefik.http.routers.sftpgo-admin-private-web.entrypoints=web-private
+      - traefik.http.routers.sftpgo-admin-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.sftpgo-admin-private-web.service=sftpgo-admin-svc
+      # --- Admin UI: HTTPS ---
+      - traefik.http.routers.sftpgo-admin-private.rule=Host(`${SFTPGO_ADMIN_HOST}`)
+      - traefik.http.routers.sftpgo-admin-private.entrypoints=websecure-private
+      - traefik.http.routers.sftpgo-admin-private.tls.certresolver=mydnschallenge
+      - traefik.http.routers.sftpgo-admin-private.service=sftpgo-admin-svc
