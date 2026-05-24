@@ -4,11 +4,17 @@ Docker Compose stacks for TrueNAS 25.10+.
 
 Each subdirectory maps to one TrueNAS custom app. The directory name matches the app name used in the TrueNAS UI.
 
-```
-truenas-ix-apps/
-  traefik/        ← three Traefik reverse-proxy instances
-  blackpearl/     ← VPN-gated media stack (Radarr, Sonarr, etc.)
-```
+| App | Description | Per-app notes |
+|---|---|---|
+| `traefik/` | Three Traefik reverse-proxy instances (private, public, AREDN) | [`traefik/README.md`](traefik/README.md) |
+| `blackpearl/` | VPN-gated media stack (Radarr, Sonarr, etc.) | [`blackpearl/README.md`](blackpearl/README.md) |
+| `plex/` | Plex Media Server (host networking, GDM discovery across VLANs) | [`plex/README.md`](plex/README.md) |
+| `tautulli/` | Plex monitoring and statistics dashboard | — (no app-specific peculiarities) |
+| `openhamclock/` | HamClock world clock UI, exposed on private/public/AREDN | [`openhamclock/README.md`](openhamclock/README.md) |
+| `registry/` | Private Docker registry for custom images (e.g. openhamclock) | [`registry/README.md`](registry/README.md) |
+| `placeholder/` | Sleeps for 10 minutes so TrueNAS creates an app's directory structure before the real app is deployed | see **Pre-Deployment** section below |
+
+Each per-app README documents the quirks (network mode, pre-deploy host setup, image sources, ordering constraints, etc.) that aren't obvious from the compose file alone. Read the relevant one before deploying.
 
 ---
 
