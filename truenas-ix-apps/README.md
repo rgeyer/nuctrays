@@ -11,7 +11,8 @@ Each subdirectory maps to one TrueNAS custom app. The directory name matches the
 | `plex/` | Plex Media Server (host networking, GDM discovery across VLANs) | [`plex/README.md`](plex/README.md) |
 | `tautulli/` | Plex monitoring and statistics dashboard | — (no app-specific peculiarities) |
 | `openhamclock/` | HamClock world clock UI, exposed on private/public/AREDN | [`openhamclock/README.md`](openhamclock/README.md) |
-| `registry/` | Private Docker registry for custom images (e.g. openhamclock) | [`registry/README.md`](registry/README.md) |
+| `registry/` | Private Docker registry for custom images (e.g. openhamclock, rflib) | [`registry/README.md`](registry/README.md) |
+| `rflib/` | Hosted rflib (radio channel library) with accounts, on private/public | [`rflib/README.md`](rflib/README.md) |
 | `sftpgo/` | Multi-user WebDAV server (ShareX upload target) on `traefik-private` | [`sftpgo/README.md`](sftpgo/README.md) |
 | `placeholder/` | Sleeps for 10 minutes so TrueNAS creates an app's directory structure before the real app is deployed | see **Pre-Deployment** section below |
 

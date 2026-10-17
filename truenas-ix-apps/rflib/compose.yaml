@@ -1,0 +1,57 @@
+name: rflib
+
+networks:
+  traefik-private:
+    external: true
+  traefik-public:
+    external: true
+
+services:
+  rflib:
+    image: ${REGISTRY_HOST}/rflib:${RFLIB_VERSION}
+    container_name: rflib
+    restart: unless-stopped
+    user: "${RFLIB_UID}:${RFLIB_GID}"
+    # Accounts, invite-only sign-up, behind Traefik's HTTPS. No ports are
+    # published: rflib trusts X-Forwarded-For with --behind-tls, so only
+    # Traefik may reach it.
+    command: ["serve", "--accounts", "--signup", "${RFLIB_SIGNUP}", "--behind-tls", "--addr", ":8080"]
+    environment:
+      - TZ=${TZ}
+      - RFLIB_DB=/data/library.db
+    volumes:
+      - ${RFLIB_DATA_PATH}:/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - traefik-private
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.rflib.loadbalancer.server.port=8080
+
+      # Private — HTTP redirects to HTTPS
+      - traefik.http.routers.rflib-private-web.rule=Host(`${RFLIB_HOST}`)
+      - traefik.http.routers.rflib-private-web.entrypoints=web-private
+      - traefik.http.routers.rflib-private-web.middlewares=redirect-to-https-private@docker
+      - traefik.http.routers.rflib-private-web.service=rflib
+      # Private — HTTPS
+      - traefik.http.routers.rflib-private.rule=Host(`${RFLIB_HOST}`)
+      - traefik.http.routers.rflib-private.entrypoints=websecure-private
+      - traefik.http.routers.rflib-private.tls.certresolver=mydnschallenge
+      - traefik.http.routers.rflib-private.service=rflib
+
+      # Public — HTTP redirects to HTTPS
+      - traefik.http.routers.rflib-public-web.rule=Host(`${RFLIB_HOST}`)
+      - traefik.http.routers.rflib-public-web.entrypoints=web-public
+      - traefik.http.routers.rflib-public-web.middlewares=redirect-to-https-public@docker
+      - traefik.http.routers.rflib-public-web.service=rflib
+      # Public — HTTPS
+      - traefik.http.routers.rflib-public.rule=Host(`${RFLIB_HOST}`)
+      - traefik.http.routers.rflib-public.entrypoints=websecure-public
+      - traefik.http.routers.rflib-public.tls.certresolver=mydnschallenge
+      - traefik.http.routers.rflib-public.service=rflib
