@@ -6,12 +6,16 @@ The hosted [rflib](https://github.com/rgeyer/rflib): sign-in with accounts, invi
 
 ### The image is built from rflib's GitHub release
 
-rflib publishes binaries, not images. `Dockerfile` downloads the release's linux binary for the build's architecture, checks it against the release's `SHA256SUMS`, and puts it on `alpine`, with `wget` for the healthcheck and `sqlite3` for backups. Build and push it to the [`registry`](../registry/) app, tagged with the release:
+rflib publishes binaries, not images. `Dockerfile` downloads the release's linux binary for the build's architecture, checks it against the release's `SHA256SUMS`, and puts it on `alpine`, with `wget` for the healthcheck and `sqlite3` for backups. Build and push it to the [`registry`](../registry/) app, tagged with the release, from your workstation (any machine with Docker that resolves `REGISTRY_HOST`), in this directory:
 
 ```bash
-docker build --build-arg RFLIB_VERSION=v0.1.0 -t ${REGISTRY_HOST}/rflib:v0.1.0 rflib/
-docker push ${REGISTRY_HOST}/rflib:v0.1.0
+cd truenas-ix-apps
+source rflib/.env      # REGISTRY_HOST and RFLIB_VERSION
+docker build --build-arg RFLIB_VERSION=$RFLIB_VERSION -t $REGISTRY_HOST/rflib:$RFLIB_VERSION rflib/
+docker push $REGISTRY_HOST/rflib:$RFLIB_VERSION
 ```
+
+The build needs only the internet (for the release) and `rflib/`; nothing from rflib's own repository. TrueNAS then pulls the image from the registry when the app deploys.
 
 For an upgrade, build the new release's tag, set `RFLIB_VERSION` in `.env`, re-render, and redeploy (see **Upgrading**).
 
@@ -23,14 +27,14 @@ rflib runs with `--behind-tls`: its session cookie is sent only over HTTPS, and 
 
 Sign-in over AREDN needs plain HTTP (`--plain-http`), which one rflib can't serve beside `--behind-tls`. An AREDN instance would be a second app with its own database.
 
-### The data directory must be writable by the container's user
+### It runs as a dedicated user, and keeps its data in that user's home
 
-The container runs as `RFLIB_UID:RFLIB_GID` (568, TrueNAS's apps user, by default) and keeps `library.db` in `RFLIB_DATA_PATH`:
+The container runs as `RFLIB_UID:RFLIB_GID`, not root, and keeps `library.db` (accounts, password hashes, sessions, every library, and the shared list) in `RFLIB_DATA_PATH`. Unlike the other apps, whose data is under `dockge/<app>/`, rflib's is in the home directory of a user of its own, so no other app can read it:
 
-```bash
-mkdir -p /mnt/<pool>/<dataset>/rflib
-chown 568:568 /mnt/<pool>/<dataset>/rflib
-```
+1. TrueNAS UI → Credentials → Users → Add: username `rflib`, **Disable Password**, shell `nologin`, and a new primary group. Check **Create Home Directory**, with the home under a dataset you snapshot, and set its permissions to the owner only (read, write, and execute for the user; nothing for group or other).
+2. Set `RFLIB_UID` and `RFLIB_GID` in `.env` to the user's IDs (`id -u rflib`, `id -g rflib`), and `RFLIB_DATA_PATH` to the home directory (`getent passwd rflib | cut -d: -f6`).
+
+TrueNAS's shared `apps` user (568) also works, but every app running as it could read the library.
 
 ## First deploy: bootstrap the database
 
@@ -47,16 +51,16 @@ The hosted database starts with the shared list from your dev instance: its chan
 2. **Copy it into the data directory** on TrueNAS:
 
    ```bash
-   scp shared.json root@<truenas-ip>:/mnt/<pool>/<dataset>/rflib/
-   ssh root@<truenas-ip> chown 568:568 /mnt/<pool>/<dataset>/rflib/shared.json
+   scp shared.json root@<truenas-ip>:<rflib's home>/
+   ssh root@<truenas-ip> chown rflib:rflib <rflib's home>/shared.json
    ```
 
-3. **Create the database, import the list, and make the admin**, with the image, before deploying the app (or with it stopped). Over SSH on TrueNAS:
+3. **Create the database, import the list, and make the admin**, with the image, before deploying the app (or with it stopped). Over SSH on TrueNAS, with your registry's hostname and the `rflib` user's IDs:
 
    ```bash
-   IMAGE=${REGISTRY_HOST}/rflib:v0.1.0
-   DATA=/mnt/<pool>/<dataset>/rflib
-   rf() { docker run --rm -it --user 568:568 -v "$DATA":/data "$IMAGE" "$@"; }
+   IMAGE=<registry host>/rflib:v0.1.0
+   DATA=$(getent passwd rflib | cut -d: -f6)          # rflib's home
+   rf() { docker run --rm -it --user "$(id -u rflib):$(id -g rflib)" -v "$DATA":/data "$IMAGE" "$@"; }
 
    rf init --no-seed                                   # an empty shared list
    rf shared import json /data/shared.json --reason "bootstrap from the dev instance"
@@ -88,7 +92,7 @@ The image includes `sqlite3`, whose online backup is safe while rflib runs and c
 docker exec rflib sh -c 'mkdir -p /data/backups && sqlite3 /data/library.db ".backup /data/backups/rflib-$(date +%F).db" && find /data/backups -name "rflib-*.db" -mtime +14 -delete'
 ```
 
-That keeps two weeks beside the database; copy `backups/` somewhere off the TrueNAS too (a replication or cloud sync task on the dataset).
+That keeps two weeks beside the database. Snapshots of the dataset holding rflib's home take `library.db` too: a snapshot is atomic, so SQLite recovers it as it would after a power cut. The `.backup` copies are the cleaner restore point. Copy one off the TrueNAS too (a replication or cloud sync task on the dataset).
 
 ## Upgrading
 
