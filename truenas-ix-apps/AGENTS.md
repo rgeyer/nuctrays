@@ -32,6 +32,7 @@ What an agent needs to know before changing or adding an app here. The [README](
 - The image is built from rflib's GitHub release (`--build-arg RFLIB_VERSION=vX.Y.Z`), checked against the release's `SHA256SUMS`, on alpine with `wget` (healthcheck) and `sqlite3` (backups).
 - It runs `serve --accounts --signup invite --behind-tls`. With `--behind-tls` it trusts `X-Forwarded-For` from anyone, so the compose file must publish no ports: only Traefik may reach it.
 - It can't also serve AREDN: that needs `--plain-http`, which excludes `--behind-tls`. AREDN would be a second app with its own database.
+- A public `demo` member account has a published password; `rflib/demo-reset.sh`, run nightly by root's cron on TrueNAS, removes and re-adds it and rebuilds its library with rflib's `web/demo/populate.mjs` (in a `node:22-alpine` container on the rflib container's network).
 - Administration runs in the container: `docker exec rflib rflib user invite` (and `user list`, `role`, `passwd`, `remove`). rflib sends no email.
 - Back up with `sqlite3 .backup` on `library.db`, which is safe while rflib runs and covers every account. `rflib export json` covers only the admin's own library, so it isn't a backup of the instance.
 - The hosted database is bootstrapped from the user's dev instance (rflib/README.md, "First deploy") with `rflib shared export json`, then `init --no-seed`, `shared import json`, and `seed update`. Shared channels keep their IDs, so built-in list updates still apply.

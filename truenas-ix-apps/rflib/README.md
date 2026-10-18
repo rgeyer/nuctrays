@@ -84,6 +84,27 @@ docker exec rflib rflib user invite
 
 Other administration works the same way, on the running container: `rflib user list`, `role`, `passwd` (rflib sends no email, so a forgotten password is reset here; it signs them out everywhere), and `remove`.
 
+## The public demo account
+
+A member account, `demo`, with a published password, so anyone can look around without an invite. Its library holds rflib's demo: two radios built from the shared list (rflib's `web/demo/populate.mjs`). A member can't change the shared list, but a visitor can change the demo's library, or its password, so `demo-reset.sh` rebuilds it nightly: it removes the account, adds it again with the published password, and populates its library, running `populate.mjs` in a throwaway `node:22-alpine` container on the rflib container's network.
+
+1. Copy the script into rflib's home, with a file holding the demo password (the one the announcement publishes), both readable by root only:
+
+   ```bash
+   scp rflib/demo-reset.sh root@<truenas-ip>:/mnt/<pool>/Homes/rflib/
+   ssh root@<truenas-ip>
+   cd /mnt/<pool>/Homes/rflib
+   printf '%s\n' '<the demo password>' > demo-password
+   chown root:root demo-reset.sh demo-password
+   chmod 700 demo-reset.sh
+   chmod 600 demo-password
+   ```
+
+2. Run it once by hand, and sign in as `demo` to check: `./demo-reset.sh ./demo-password`.
+3. Add a cron job (System → Advanced → Cron Jobs), as root, nightly: `/mnt/<pool>/Homes/rflib/demo-reset.sh /mnt/<pool>/Homes/rflib/demo-password`.
+
+The script fetches `populate.mjs` from rflib's `main` branch each time; set `POPULATE` to a file or another URL (such as a tag's) to pin it.
+
 ## Backups
 
 The image includes `sqlite3`, whose online backup is safe while rflib runs and covers everything: every account and library, sessions, and the shared list. From TrueNAS, daily (a cron job under System → Advanced → Cron Jobs):
