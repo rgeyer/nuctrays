@@ -10,7 +10,7 @@ networks:
 
 services:
   openhamclock:
-    image: ${REGISTRY_HOST}/openhamclock:latest
+    image: ghcr.io/accius/openhamclock:latest
     container_name: openhamclock
     restart: unless-stopped
     environment:
